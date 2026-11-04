@@ -24,7 +24,7 @@ export default async function Settings() {
               <label key={f.key}>
                 {f.label}
                 {f.type === 'textarea' ? (
-                  <textarea name={f.key} rows={3} defaultValue={settings[f.key]} />
+                  <textarea name={f.key} rows={3} defaultValue={settings[f.key]} dir={f.rtl ? 'rtl' : undefined} />
                 ) : f.type === 'select' ? (
                   <select name={f.key} defaultValue={settings[f.key]}>
                     {f.options.map((o) => (
@@ -34,7 +34,7 @@ export default async function Settings() {
                     ))}
                   </select>
                 ) : (
-                  <input name={f.key} defaultValue={settings[f.key]} />
+                  <input name={f.key} defaultValue={settings[f.key]} dir={f.rtl ? 'rtl' : undefined} />
                 )}
               </label>
             ))}

@@ -7,6 +7,7 @@ export default function SendForm({ branches }) {
   const [branchId, setBranchId] = useState(branches[0]?.id || '');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [lang, setLang] = useState('en');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
@@ -27,7 +28,7 @@ export default function SendForm({ branches }) {
     try {
       localStorage.setItem('voc_branch', branchId);
     } catch {}
-    const res = await createVisit({ branchId, name, phone });
+    const res = await createVisit({ branchId, name, phone, lang });
     setBusy(false);
     if (res.error) {
       setError(res.error);
@@ -62,6 +63,13 @@ export default function SendForm({ branches }) {
       <label>
         Customer name (optional)
         <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
+      </label>
+      <label>
+        Message language
+        <select value={lang} onChange={(e) => setLang(e.target.value)}>
+          <option value="en">English</option>
+          <option value="ar">Arabic</option>
+        </select>
       </label>
       <label>
         Customer mobile

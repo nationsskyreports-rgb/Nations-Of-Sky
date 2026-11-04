@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
+import { detectLang } from '@/lib/i18n';
 import SurveyFlow from '@/components/SurveyFlow';
 import { admin } from '@/lib/supabase-admin';
 import { getSettings, getActiveQuestions } from '@/lib/settings';
@@ -6,7 +8,7 @@ import { getSettings, getActiveQuestions } from '@/lib/settings';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Voice of Customer' };
 
-export default async function BranchSurvey({ params }) {
+export default async function BranchSurvey({ params, searchParams }) {
   const { data: branch } = await admin()
     .from('branches')
     .select('id, slug, active')
@@ -14,7 +16,9 @@ export default async function BranchSurvey({ params }) {
     .maybeSingle();
   if (!branch || !branch.active) notFound();
 
+  const lang = detectLang(searchParams?.l, headers().get('accept-language'));
+  const locked = searchParams?.l === 'ar' || searchParams?.l === 'en';
   const [settings, questions] = await Promise.all([getSettings(), getActiveQuestions()]);
 
-  return <SurveyFlow branchSlug={branch.slug} questions={questions} settings={settings} />;
+  return <SurveyFlow branchSlug={branch.slug} questions={questions} settings={settings} initialLang={lang} langLocked={locked} />;
 }

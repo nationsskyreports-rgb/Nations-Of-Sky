@@ -104,16 +104,23 @@ export async function questionAction(formData) {
     if (!label) throw new Error('Enter the question.');
     if (!QUESTION_TYPES.some((t) => t.value === type)) throw new Error('Choose a question type.');
 
-    const options = text(formData, 'options')
-      .split('\n')
-      .map((o) => o.trim())
-      .filter(Boolean);
+    const lines = (key) =>
+      text(formData, key)
+        .split('\n')
+        .map((o) => o.trim())
+        .filter(Boolean);
+    const options = lines('options');
+    const optionsAr = lines('options_ar');
     if (type === 'choice' && options.length < 2) throw new Error('Add at least two choices, one per line.');
+    if (type === 'choice' && optionsAr.length && optionsAr.length !== options.length)
+      throw new Error('Arabic choices must match the English choices line by line.');
 
     const row = {
       label,
+      label_ar: text(formData, 'label_ar'),
       type,
       options: type === 'choice' ? options : [],
+      options_ar: type === 'choice' ? optionsAr : [],
       required: formData.get('required') === 'on',
       active: formData.get('active') === 'on',
     };
@@ -180,7 +187,7 @@ export async function setUserActive(formData) {
 
 /* ---------- WhatsApp visit links ---------- */
 
-export async function createVisit({ branchId, name, phone }) {
+export async function createVisit({ branchId, name, phone, lang }) {
   const user = await needUser();
   const db = admin();
   const settings = await getSettings();
@@ -203,9 +210,11 @@ export async function createVisit({ branchId, name, phone }) {
   });
   if (error) return { error: 'Could not create the link.' };
 
-  const link = `${getBaseUrl()}/v/${token}`;
-  const message = settings.whatsapp_message
-    .replaceAll('{name}', customer || 'there')
+  const ar = lang === 'ar';
+  const link = `${getBaseUrl()}/v/${token}${ar ? '?l=ar' : ''}`;
+  const template = (ar && settings.whatsapp_message_ar) || settings.whatsapp_message;
+  const message = template
+    .replaceAll('{name}', customer || (ar ? 'عزيزي العميل' : 'there'))
     .replaceAll('{link}', link)
     .replaceAll('{staff}', user.name)
     .replaceAll('{branch}', branch.name);

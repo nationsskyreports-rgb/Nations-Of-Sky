@@ -1,9 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { UI } from '@/lib/i18n';
 
 const STAR = 'M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.2 1.2-6.5L2.5 9.5l6.6-.9L12 2.6z';
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
+const STEPS = ['intro', 'details', 'done'];
+
+// Score colours: this and above is green, this and above (up to green) is yellow, the rest is red.
+const NPS_GREEN_FROM = 9;
+const NPS_YELLOW_FROM = 6;
+const npsTone = (n) => (n >= NPS_GREEN_FROM ? 'green' : n >= NPS_YELLOW_FROM ? 'yellow' : 'red');
 
 function Lock({ open }) {
   return (
@@ -16,88 +23,88 @@ function Lock({ open }) {
   );
 }
 
-const RATING_LABELS = ['Poor', 'Fair', 'Good', 'Very good', 'Excellent'];
-const STEPS = ['intro', 'details', 'done'];
-
-function Question({ q, value, onChange }) {
+function Question({ q, value, onChange, lang, t }) {
   const options = Array.isArray(q.options) ? q.options : [];
+  const optionsAr = Array.isArray(q.options_ar) ? q.options_ar : [];
+
   if (q.type === 'choice') {
     return (
       <div className="vc-pills">
-        {options.map((o) => (
-          <button
-            type="button"
-            key={o}
-            className={`vc-pill ${value === o ? 'on' : ''}`}
-            onClick={() => onChange(o)}
-          >
-            {o}
+        {options.map((o, i) => (
+          <button type="button" key={o} className={`vc-pill ${value === o ? 'on' : ''}`} onClick={() => onChange(o)}>
+            {lang === 'ar' && optionsAr[i] ? optionsAr[i] : o}
           </button>
         ))}
       </div>
     );
   }
+
   if (q.type === 'yesno') {
     return (
       <div className="vc-pills">
-        {['Yes', 'No'].map((o) => (
-          <button
-            type="button"
-            key={o}
-            className={`vc-pill ${value === o ? 'on' : ''}`}
-            onClick={() => onChange(o)}
-          >
-            {o}
+        {[
+          ['Yes', t.yes],
+          ['No', t.no],
+        ].map(([v, label]) => (
+          <button type="button" key={v} className={`vc-pill ${value === v ? 'on' : ''}`} onClick={() => onChange(v)}>
+            {label}
           </button>
         ))}
       </div>
     );
   }
+
   if (q.type === 'nps') {
     return (
       <div>
         <div className="vc-nps">
-          {Array.from({ length: 11 }, (_, i) => (
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
             <button
               type="button"
-              key={i}
-              className={`vc-pill ${value === i ? 'on' : ''}`}
-              onClick={() => onChange(i)}
+              key={n}
+              className={`vc-pill nps-${npsTone(n)} ${value === n ? 'on' : ''}`}
+              onClick={() => onChange(n)}
             >
-              {i}
+              {n}
             </button>
           ))}
         </div>
         <div className="vc-nps-legend">
-          <span>Not likely</span>
-          <span>Very likely</span>
+          <span>{t.notLikely}</span>
+          <span>{t.veryLikely}</span>
         </div>
       </div>
     );
   }
+
   if (q.type === 'text') {
-    return (
-      <textarea
-        className="vc-input"
-        rows={3}
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    );
+    return <textarea className="vc-input" rows={3} value={value || ''} onChange={(e) => onChange(e.target.value)} />;
   }
+
   return (
     <input
       className="vc-input"
       type={q.type === 'phone' ? 'tel' : 'text'}
       inputMode={q.type === 'phone' ? 'tel' : 'text'}
       autoComplete={q.type === 'phone' ? 'tel' : 'name'}
+      dir={q.type === 'phone' ? 'ltr' : undefined}
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
     />
   );
 }
 
-export default function SurveyFlow({ branchSlug, token, customerName, staffName, questions, settings }) {
+export default function SurveyFlow({
+  branchSlug,
+  token,
+  customerName,
+  staffName,
+  questions,
+  settings,
+  initialLang = 'en',
+  langLocked = false,
+}) {
+  const [lang, setLang] = useState(initialLang);
   const [step, setStep] = useState('intro');
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
@@ -112,6 +119,27 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
   ratingRef.current = rating;
   answersRef.current = answers;
   stepRef.current = step;
+
+  const t = UI[lang];
+  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const S = (key) => (lang === 'ar' && settings[`${key}_ar`]) || settings[key];
+
+  // Remember the language the customer picked last time.
+  useEffect(() => {
+    if (langLocked) return;
+    try {
+      const saved = localStorage.getItem('voc_lang');
+      if (saved === 'ar' || saved === 'en') setLang(saved);
+    } catch {}
+  }, [langLocked]);
+
+  const switchLang = () => {
+    const next = lang === 'en' ? 'ar' : 'en';
+    setLang(next);
+    try {
+      localStorage.setItem('voc_lang', next);
+    } catch {}
+  };
 
   // Every page open is logged, even if the customer never answers.
   useEffect(() => {
@@ -166,8 +194,8 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
   // Autosave answers while the customer types.
   useEffect(() => {
     if (step !== 'details') return;
-    const t = setTimeout(() => save({ rating, answers }), 700);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => save({ rating, answers }), 700);
+    return () => clearTimeout(timer);
   }, [answers, step, rating, save]);
 
   // Save whatever is there if the page is closed.
@@ -218,28 +246,34 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
   const showGoogle = settings.google_review_url && rating >= minGoogle;
   const stepIndex = STEPS.indexOf(step);
   const active = hover || rating;
+  const rewardLabel = S('reward_link_label');
 
   return (
-    <main className="vc-shell">
-      <div className="vc-glow" />
+    <main className="vc-shell" dir={dir} lang={lang}>
       <div className="vc-card">
-        <img className="vc-logo" src="/logo.png" alt="" width="46" height="46" />
-        <p className="vc-eyebrow">Voice of Customer</p>
+        <button type="button" className="vc-lang" onClick={switchLang}>
+          {t.switchTo}
+        </button>
+
+        <span className="vc-logo" aria-hidden="true" />
+        <p className="vc-eyebrow">{t.brand}</p>
 
         {step === 'intro' && (
           <section className="vc-fade" key="intro">
-            <p className="vc-hello">{first ? `Hello ${first}` : 'Welcome'}</p>
-            <h1 className="vc-title">{settings.intro_headline}</h1>
-            <p className="vc-sub">{settings.intro_sub}</p>
+            <p className="vc-hello">{first ? t.hello.replace('{name}', first) : t.welcome}</p>
+            <h1 className="vc-title">{S('intro_headline')}</h1>
+            <p className="vc-sub">{S('intro_sub')}</p>
 
             <div className="vc-rate">
-              <p className="vc-ask">{staffName ? `How was your visit with ${staffName}?` : 'How was your visit?'}</p>
+              <p className="vc-ask">
+                {staffName ? t.askVisitStaff.replace('{staff}', staffName) : t.askVisit}
+              </p>
               <div className="vc-stars" onMouseLeave={() => setHover(0)}>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
                     type="button"
                     key={n}
-                    aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                    aria-label={`${n}`}
                     className={`vc-star ${n <= active ? 'on' : ''}`}
                     onMouseEnter={() => setHover(n)}
                     onClick={() => pick(n)}
@@ -250,15 +284,15 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
                   </button>
                 ))}
               </div>
-              <p className="vc-rate-label">{active ? RATING_LABELS[active - 1] : 'Tap a star'}</p>
+              <p className="vc-rate-label">{active ? t.ratings[active - 1] : t.tapStar}</p>
             </div>
 
             {showReward && (
               <div className="vc-gift locked">
                 <Lock />
                 <div className="vc-gift-text">
-                  <strong>A surprise is waiting for you</strong>
-                  <span>Unlocks right after your feedback</span>
+                  <strong>{t.giftLockedTitle}</strong>
+                  <span>{t.giftLockedText}</span>
                 </div>
               </div>
             )}
@@ -267,52 +301,58 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
 
         {step === 'details' && (
           <section className="vc-fade" key="details">
-            <h1 className="vc-title">{settings.details_headline}</h1>
-            <p className="vc-sub">{settings.details_sub}</p>
+            <h1 className="vc-title">{S('details_headline')}</h1>
+            <p className="vc-sub">{S('details_sub')}</p>
 
             <div className="vc-questions">
               {questions.map((q) => (
                 <div className="vc-q" key={q.id}>
                   <label>
-                    {q.label}
+                    {lang === 'ar' && q.label_ar ? q.label_ar : q.label}
                     {q.required ? <em> *</em> : null}
                   </label>
-                  <Question q={q} value={answers[q.id]} onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))} />
+                  <Question
+                    q={q}
+                    lang={lang}
+                    t={t}
+                    value={answers[q.id]}
+                    onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
+                  />
                 </div>
               ))}
             </div>
 
             <button type="button" className="vc-btn" disabled={!canSubmit || busy} onClick={submit}>
-              {busy ? 'Sending...' : showReward ? 'Unlock my surprise' : 'Send feedback'}
+              {busy ? t.sending : showReward ? t.unlock : t.send}
             </button>
           </section>
         )}
 
         {step === 'done' && (
           <section className="vc-fade" key="done">
-            <h1 className="vc-title">{settings.thanks_title}</h1>
-            <p className="vc-sub">{settings.thanks_body}</p>
+            <h1 className="vc-title">{S('thanks_title')}</h1>
+            <p className="vc-sub">{S('thanks_body')}</p>
 
             {showReward && (
               <div className="vc-gift open">
                 <Lock open />
                 <div className="vc-gift-text">
-                  <strong>{settings.reward_title}</strong>
-                  <span>{settings.reward_body}</span>
+                  <strong>{S('reward_title')}</strong>
+                  <span>{S('reward_body')}</span>
                   {settings.reward_code ? <b className="vc-code">{settings.reward_code}</b> : null}
                 </div>
               </div>
             )}
 
-            {settings.reward_link_url && settings.reward_link_label ? (
+            {settings.reward_link_url && rewardLabel ? (
               <a className="vc-btn" href={settings.reward_link_url} target="_blank" rel="noopener noreferrer">
-                {settings.reward_link_label}
+                {rewardLabel}
               </a>
             ) : null}
 
             {showGoogle ? (
               <a className="vc-btn ghost" href={settings.google_review_url} target="_blank" rel="noopener noreferrer">
-                Share your experience on Google
+                {t.google}
               </a>
             ) : null}
           </section>

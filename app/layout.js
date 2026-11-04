@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: '#0a0a0a',
+  themeColor: '#f2f2f3',
   width: 'device-width',
   initialScale: 1,
 };
@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@300..700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..700;1,300&family=Playfair+Display:wght@600;700&family=Cairo:wght@400..800&display=swap"
         />
       </head>
       <body>{children}</body>
