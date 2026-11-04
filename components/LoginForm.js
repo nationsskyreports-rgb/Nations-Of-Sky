@@ -40,38 +40,45 @@ export default function LoginForm({ denied }) {
   };
 
   return (
-    <form onSubmit={submit} className="vc-form">
-      <input
-        className="vc-input"
-        type="email"
-        placeholder="Email"
-        autoComplete="email"
-        autoCapitalize="none"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <div className="vc-field">
+    <form onSubmit={submit} className="lg-form">
+      <label className="lg-label">
+        Email
         <input
-          className="vc-input"
-          type={show ? 'text' : 'password'}
-          placeholder="Password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          className="lg-input"
+          type="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <button
-          type="button"
-          className="vc-eye"
-          aria-label={show ? 'Hide password' : 'Show password'}
-          onClick={() => setShow((s) => !s)}
-        >
-          <Eye off={show} />
-        </button>
-      </div>
-      {error ? <p className="vc-error">{error}</p> : null}
-      <button className="vc-btn" disabled={busy}>
+      </label>
+
+      <label className="lg-label">
+        Password
+        <span className="lg-field">
+          <input
+            className="lg-input"
+            type={show ? 'text' : 'password'}
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="lg-eye"
+            aria-label={show ? 'Hide password' : 'Show password'}
+            onClick={() => setShow((s) => !s)}
+          >
+            <Eye off={show} />
+          </button>
+        </span>
+      </label>
+
+      {error ? <p className="lg-error">{error}</p> : null}
+
+      <button className="lg-btn" disabled={busy}>
         {busy ? 'Signing in...' : 'Sign in'}
       </button>
     </form>

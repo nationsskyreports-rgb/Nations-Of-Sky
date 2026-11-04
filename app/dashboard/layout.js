@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
+import NavLink from '@/components/NavLink';
 import SignOut from '@/components/SignOut';
 
 export const dynamic = 'force-dynamic';
@@ -24,21 +24,26 @@ export default async function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="d-wrap">
+    <div className="light d-wrap">
       <header className="d-top no-print">
         <div className="d-brand">
-          <img src="/logo.png" alt="" width="28" height="28" />
+          <span className="d-mark">
+            <img src="/logo.png" alt="" width="20" height="20" />
+          </span>
           <span>Voice of Customer</span>
         </div>
-        <nav className="d-nav">
+        <nav className="d-nav" aria-label="Main">
           {links.map(([href, label]) => (
-            <Link key={href} href={href} className="d-link">
+            <NavLink key={href} href={href}>
               {label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
         <div className="d-user">
-          <span>{user.name}</span>
+          <span className="d-avatar" aria-hidden="true">
+            {String(user.name || '?').trim().charAt(0).toUpperCase()}
+          </span>
+          <span className="d-user-name">{user.name}</span>
           <SignOut />
         </div>
       </header>
