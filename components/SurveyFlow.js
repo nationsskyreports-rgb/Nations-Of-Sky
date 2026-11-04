@@ -1,16 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { UI } from '@/lib/i18n';
+import { buildText } from '@/lib/i18n';
 
 const STAR = 'M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.2 1.2-6.5L2.5 9.5l6.6-.9L12 2.6z';
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 const STEPS = ['intro', 'details', 'done'];
 
-// Score colours: this and above is green, this and above (up to green) is yellow, the rest is red.
-const NPS_GREEN_FROM = 9;
-const NPS_YELLOW_FROM = 6;
-const npsTone = (n) => (n >= NPS_GREEN_FROM ? 'green' : n >= NPS_YELLOW_FROM ? 'yellow' : 'red');
+// Score colours: thresholds come from settings (green from X, yellow from Y, the rest red).
+const makeTone = (settings) => {
+  const green = parseInt(settings.nps_green_from, 10) || 9;
+  const yellow = parseInt(settings.nps_yellow_from, 10) || 6;
+  return (n) => (n >= green ? 'green' : n >= yellow ? 'yellow' : 'red');
+};
+const HEX = /^#[0-9a-f]{6}$/i;
 
 function Lock({ open }) {
   return (
@@ -23,7 +26,7 @@ function Lock({ open }) {
   );
 }
 
-function Question({ q, value, onChange, lang, t }) {
+function Question({ q, value, onChange, lang, t, tone }) {
   const options = Array.isArray(q.options) ? q.options : [];
   const optionsAr = Array.isArray(q.options_ar) ? q.options_ar : [];
 
@@ -62,7 +65,7 @@ function Question({ q, value, onChange, lang, t }) {
             <button
               type="button"
               key={n}
-              className={`vc-pill nps-${npsTone(n)} ${value === n ? 'on' : ''}`}
+              className={`vc-pill nps-${tone(n)} ${value === n ? 'on' : ''}`}
               onClick={() => onChange(n)}
             >
               {n}
@@ -120,7 +123,19 @@ export default function SurveyFlow({
   answersRef.current = answers;
   stepRef.current = step;
 
-  const t = UI[lang];
+  const t = buildText(settings, lang);
+  const tone = makeTone(settings);
+  const themeVars = {};
+  [
+    ['--bronze', 'color_brand'],
+    ['--paper', 'color_bg'],
+    ['--ink', 'color_text'],
+    ['--red', 'color_low'],
+    ['--yellow', 'color_mid'],
+    ['--green', 'color_high'],
+  ].forEach(([v, k]) => {
+    if (HEX.test(settings[k] || '')) themeVars[v] = settings[k];
+  });
   const dir = lang === 'ar' ? 'rtl' : 'ltr';
   const S = (key) => (lang === 'ar' && settings[`${key}_ar`]) || settings[key];
 
@@ -231,7 +246,16 @@ export default function SurveyFlow({
     const v = answers[q.id];
     return v !== undefined && v !== null && String(v).trim() !== '';
   };
-  const canSubmit = questions.every((q) => !q.required || filled(q));
+  const isRequired = (q) =>
+    q.required ||
+    (q.type === 'name' && settings.require_name === 'true') ||
+    (q.type === 'phone' && settings.require_phone === 'true');
+  const valid = (q) => {
+    if (!filled(q)) return false;
+    if (q.type === 'phone') return String(answers[q.id]).replace(/\D/g, '').length >= 7;
+    return true;
+  };
+  const canSubmit = questions.every((q) => (isRequired(q) ? valid(q) : !filled(q) || valid(q)));
 
   const submit = async () => {
     setBusy(true);
@@ -249,11 +273,13 @@ export default function SurveyFlow({
   const rewardLabel = S('reward_link_label');
 
   return (
-    <main className="vc-shell" dir={dir} lang={lang}>
+    <main className="vc-shell" dir={dir} lang={lang} style={themeVars}>
       <div className="vc-card">
-        <button type="button" className="vc-lang" onClick={switchLang}>
-          {t.switchTo}
-        </button>
+        {settings.show_lang_switch === 'false' ? null : (
+          <button type="button" className="vc-lang" onClick={switchLang}>
+            {t.switchTo}
+          </button>
+        )}
 
         <span className="vc-logo" aria-hidden="true" />
         <p className="vc-eyebrow">{t.brand}</p>
@@ -309,12 +335,13 @@ export default function SurveyFlow({
                 <div className="vc-q" key={q.id}>
                   <label>
                     {lang === 'ar' && q.label_ar ? q.label_ar : q.label}
-                    {q.required ? <em> *</em> : null}
+                    {isRequired(q) ? <em> *</em> : null}
                   </label>
                   <Question
                     q={q}
                     lang={lang}
                     t={t}
+                    tone={tone}
                     value={answers[q.id]}
                     onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
                   />
@@ -324,6 +351,9 @@ export default function SurveyFlow({
 
             <button type="button" className="vc-btn" disabled={!canSubmit || busy} onClick={submit}>
               {busy ? t.sending : showReward ? t.unlock : t.send}
+            </button>
+            <button type="button" className="vc-back" onClick={() => setStep('intro')}>
+              <span aria-hidden="true">{lang === 'ar' ? '→' : '←'}</span> {t.back}
             </button>
           </section>
         )}

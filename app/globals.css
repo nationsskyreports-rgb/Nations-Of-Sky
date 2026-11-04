@@ -43,8 +43,8 @@ textarea {
 
 .vc-shell {
   --bronze: #b5934c;
-  --bronze-dark: #9a7b38;
-  --bronze-soft: rgba(181, 147, 76, 0.12);
+  --bronze-dark: color-mix(in srgb, var(--bronze) 78%, #000);
+  --bronze-soft: color-mix(in srgb, var(--bronze) 13%, transparent);
   --ink: #4d4d4f;
   --ink-strong: #2a2a2c;
   --paper: #f2f2f3;
@@ -255,7 +255,7 @@ textarea {
 
 .vc-gift.open {
   border-style: solid;
-  background: #fbf7ee;
+  background: color-mix(in srgb, var(--bronze) 8%, #fff);
 }
 
 .vc-gift-icon {
@@ -387,7 +387,7 @@ textarea.vc-input {
 }
 .vc-nps .nps-yellow {
   border-color: var(--yellow);
-  color: #a87700;
+  color: color-mix(in srgb, var(--yellow) 68%, #000);
 }
 .vc-nps .nps-green {
   border-color: var(--green);
@@ -395,29 +395,33 @@ textarea.vc-input {
 }
 
 .vc-nps .nps-red:hover {
-  background: rgba(214, 69, 69, 0.1);
+  background: color-mix(in srgb, var(--red) 11%, transparent);
 }
 .vc-nps .nps-yellow:hover {
-  background: rgba(229, 168, 18, 0.14);
+  background: color-mix(in srgb, var(--yellow) 14%, transparent);
 }
 .vc-nps .nps-green:hover {
-  background: rgba(47, 158, 91, 0.1);
+  background: color-mix(in srgb, var(--green) 11%, transparent);
 }
 
-.vc-nps .nps-red.on {
+.vc-nps .nps-red.on,
+.vc-nps .nps-red.on:hover {
   background: var(--red);
   color: #fff;
 }
-.vc-nps .nps-yellow.on {
+.vc-nps .nps-yellow.on,
+.vc-nps .nps-yellow.on:hover {
   background: var(--yellow);
   color: #fff;
 }
-.vc-nps .nps-green.on {
+.vc-nps .nps-green.on,
+.vc-nps .nps-green.on:hover {
   background: var(--green);
   color: #fff;
 }
 
 .vc-nps-legend {
+  direction: ltr;
   display: flex;
   justify-content: space-between;
   margin-top: 8px;
@@ -467,6 +471,23 @@ textarea.vc-input {
 
 .vc-btn.ghost:hover {
   background: var(--bronze-soft);
+}
+
+.vc-back {
+  display: block;
+  margin: 14px auto 0;
+  background: none;
+  border: 0;
+  padding: 6px 12px;
+  color: var(--ink);
+  font: 500 13px 'Montserrat', 'Cairo', sans-serif;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.vc-back:hover {
+  color: var(--bronze-dark);
+  opacity: 1;
 }
 
 .vc-steps {
@@ -1641,3 +1662,9 @@ body:has(.light) {
   }
 }
 
+
+.d-form input.d-color {
+  height: 44px;
+  padding: 4px;
+  cursor: pointer;
+}

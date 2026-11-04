@@ -27,12 +27,18 @@ export default async function Settings() {
                   <textarea name={f.key} rows={3} defaultValue={settings[f.key]} dir={f.rtl ? 'rtl' : undefined} />
                 ) : f.type === 'select' ? (
                   <select name={f.key} defaultValue={settings[f.key]}>
-                    {f.options.map((o) => (
-                      <option key={o} value={o}>
-                        {o === 'true' ? 'Yes' : 'No'}
-                      </option>
-                    ))}
+                    {f.options.map((o) => {
+                      const value = typeof o === 'string' ? o : o.value;
+                      const label = typeof o === 'string' ? (o === 'true' ? 'Yes' : 'No') : o.label;
+                      return (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      );
+                    })}
                   </select>
+                ) : f.type === 'color' ? (
+                  <input type="color" name={f.key} defaultValue={settings[f.key]} className="d-color" />
                 ) : (
                   <input name={f.key} defaultValue={settings[f.key]} dir={f.rtl ? 'rtl' : undefined} />
                 )}

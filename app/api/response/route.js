@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { admin } from '@/lib/supabase-admin';
 import { clip } from '@/lib/server-utils';
+import { getSettings } from '@/lib/settings';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -61,6 +62,14 @@ export async function POST(req) {
   }
 
   if (body.final) {
+    const settings = await getSettings();
+    const { data: active } = await db.from('questions').select('type').eq('active', true);
+    const types = new Set((active || []).map((q) => q.type));
+    const digits = String(row.phone || '').replace(/\D/g, '').length;
+    if (settings.require_name === 'true' && types.has('name') && !row.name)
+      return NextResponse.json({ error: 'Name required' }, { status: 422 });
+    if (settings.require_phone === 'true' && types.has('phone') && digits < 7)
+      return NextResponse.json({ error: 'Mobile required' }, { status: 422 });
     row.status = 'complete';
     row.completed_at = now;
   }

@@ -17,9 +17,10 @@ export default async function VisitSurvey({ params, searchParams }) {
   const branch = Array.isArray(visit?.branches) ? visit.branches[0] : visit?.branches;
   if (!visit || !branch?.active) notFound();
 
-  const lang = detectLang(searchParams?.l, headers().get('accept-language'));
-  const locked = searchParams?.l === 'ar' || searchParams?.l === 'en';
   const [settings, questions] = await Promise.all([getSettings(), getActiveQuestions()]);
+  const forced = settings.default_language;
+  const lang = detectLang(searchParams?.l, headers().get('accept-language'), forced);
+  const locked = searchParams?.l === 'ar' || searchParams?.l === 'en' || forced === 'ar' || forced === 'en';
 
   return (
     <SurveyFlow
