@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import AutoFilters from '@/components/AutoFilters';
+import LiveRefresh from '@/components/LiveRefresh';
 import { admin, fetchAll, one } from '@/lib/supabase-admin';
 import { avg, pct, rangeStart, dayKey, fmtDateTime } from '@/lib/format';
 
@@ -118,25 +120,15 @@ export default async function Overview({ searchParams }) {
   return (
     <div className="d-page">
       <div className="d-head">
-        <h1>Overview</h1>
-        <form className="d-filters" method="get">
-          <select name="range" defaultValue={range}>
-            {RANGES.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <select name="branch" defaultValue={branch}>
-            <option value="">All branches</option>
-            {(branches || []).map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-          <button className="d-btn">Apply</button>
-        </form>
+        <h1>
+          Overview <LiveRefresh />
+        </h1>
+        <AutoFilters
+          fields={[
+            { name: 'range', defaultValue: '30d', options: RANGES },
+            { name: 'branch', defaultValue: '', options: [['', 'All branches'], ...(branches || []).map((b) => [b.id, b.name])] },
+          ]}
+        />
       </div>
 
       <div className="d-stats">

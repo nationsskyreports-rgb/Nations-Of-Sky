@@ -1668,3 +1668,40 @@ body:has(.light) {
   padding: 4px;
   cursor: pointer;
 }
+
+.d-filters.busy select {
+  opacity: 0.6;
+}
+
+.d-updating {
+  font-size: 12px;
+  color: #8a8a8d;
+}
+
+.d-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(47, 158, 91, 0.1);
+  color: #2f9e5b;
+  font: 600 11px/1.4 var(--sans);
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.d-live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2f9e5b;
+  animation: dLive 1.6s ease-in-out infinite;
+}
+
+@keyframes dLive {
+  50% {
+    opacity: 0.25;
+  }
+}

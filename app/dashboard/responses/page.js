@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import AutoFilters from '@/components/AutoFilters';
+import LiveRefresh from '@/components/LiveRefresh';
 import { admin, fetchAll, one } from '@/lib/supabase-admin';
 import { fmtDateTime, rangeStart } from '@/lib/format';
 
@@ -66,40 +68,18 @@ export default async function Responses({ searchParams }) {
   return (
     <div className="d-page">
       <div className="d-head">
-        <h1>Activity</h1>
-        <form className="d-filters" method="get">
-          <select name="status" defaultValue={status}>
-            {STATUSES.map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-          <select name="range" defaultValue={range}>
-            {RANGES.map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-          <select name="branch" defaultValue={branch}>
-            <option value="">All branches</option>
-            {(branches || []).map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-          <select name="source" defaultValue={source}>
-            <option value="">QR + WhatsApp</option>
-            <option value="qr">QR code</option>
-            <option value="whatsapp">WhatsApp link</option>
-          </select>
-          <button className="d-btn">Apply</button>
-          <a className="d-btn ghost" href={`/api/export${qs({})}`}>
-            Download CSV
-          </a>
-        </form>
+        <h1>
+          Activity <LiveRefresh />
+        </h1>
+        <AutoFilters
+          csv
+          fields={[
+            { name: 'status', defaultValue: '', options: STATUSES },
+            { name: 'range', defaultValue: '30d', options: RANGES },
+            { name: 'branch', defaultValue: '', options: [['', 'All branches'], ...(branches || []).map((b) => [b.id, b.name])] },
+            { name: 'source', defaultValue: '', options: [['', 'QR + WhatsApp'], ['qr', 'QR code'], ['whatsapp', 'WhatsApp link']] },
+          ]}
+        />
       </div>
 
       <p className="d-note">{all.length} results</p>
