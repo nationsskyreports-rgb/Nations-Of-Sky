@@ -1,6 +1,7 @@
 import { requireUser } from '@/lib/auth';
 import NavLink from '@/components/NavLink';
 import SignOut from '@/components/SignOut';
+import { ToastProvider } from '@/components/Toast';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard' };
@@ -25,6 +26,7 @@ export default async function DashboardLayout({ children }) {
 
   return (
     <div className="light d-wrap">
+      <ToastProvider>
       <header className="d-top no-print">
         <div className="d-brand">
           <span className="d-mark">
@@ -48,6 +50,7 @@ export default async function DashboardLayout({ children }) {
         </div>
       </header>
       <div className="d-body">{children}</div>
+      </ToastProvider>
     </div>
   );
 }

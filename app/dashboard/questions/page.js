@@ -1,12 +1,8 @@
 import { admin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/auth';
 import { QUESTION_TYPES } from '@/lib/config';
-import {
-  saveQuestion,
-  moveQuestionUp,
-  moveQuestionDown,
-  deleteQuestion,
-} from '@/app/dashboard/actions';
+import { questionAction } from '@/app/dashboard/actions';
+import ActionForm from '@/components/ActionForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,31 +58,41 @@ export default async function Questions() {
 
       <div className="d-cards one">
         {(questions || []).map((q) => (
-          <form className="d-card d-form" action={saveQuestion} key={q.id}>
+          <ActionForm className="d-card d-form" action={questionAction} key={q.id}>
             <input type="hidden" name="id" value={q.id} />
             <Fields q={q} />
             <div className="d-actions">
-              <button className="d-btn">Save</button>
-              <button className="d-btn ghost" formAction={moveQuestionUp} formNoValidate>
+              <button className="d-btn" name="intent" value="save">
+                Save
+              </button>
+              <button className="d-btn ghost" name="intent" value="up" formNoValidate>
                 Move up
               </button>
-              <button className="d-btn ghost" formAction={moveQuestionDown} formNoValidate>
+              <button className="d-btn ghost" name="intent" value="down" formNoValidate>
                 Move down
               </button>
-              <button className="d-btn danger" formAction={deleteQuestion} formNoValidate>
+              <button
+                className="d-btn danger"
+                name="intent"
+                value="delete"
+                formNoValidate
+                data-confirm="Delete this question? Answers already collected are kept."
+              >
                 Delete
               </button>
             </div>
-          </form>
+          </ActionForm>
         ))}
 
-        <form className="d-card d-form" action={saveQuestion}>
+        <ActionForm className="d-card d-form" action={questionAction} reset>
           <h2>Add a question</h2>
           <Fields q={null} />
           <div className="d-actions">
-            <button className="d-btn">Add question</button>
+            <button className="d-btn" name="intent" value="save">
+              Add question
+            </button>
           </div>
-        </form>
+        </ActionForm>
       </div>
     </div>
   );

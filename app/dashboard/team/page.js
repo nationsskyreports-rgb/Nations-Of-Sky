@@ -1,6 +1,7 @@
 import { admin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/auth';
 import { createUser, setUserActive } from '@/app/dashboard/actions';
+import ActionForm from '@/components/ActionForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,7 @@ export default async function Team() {
         <h1>Team</h1>
       </div>
 
-      <form className="d-card d-form" action={createUser}>
+      <ActionForm className="d-card d-form" action={createUser} success="User created" reset>
         <h2>Add a user</h2>
         <label>
           Name
@@ -41,7 +42,7 @@ export default async function Team() {
         <div className="d-actions">
           <button className="d-btn">Create user</button>
         </div>
-      </form>
+      </ActionForm>
 
       <section className="d-card">
         <div className="d-table-wrap">
@@ -64,11 +65,11 @@ export default async function Team() {
                   <td>{p.active ? 'Active' : 'Disabled'}</td>
                   <td>
                     {p.id !== me.id ? (
-                      <form action={setUserActive}>
+                      <ActionForm action={setUserActive}>
                         <input type="hidden" name="id" value={p.id} />
                         <input type="hidden" name="active" value={p.active ? '0' : '1'} />
                         <button className="d-btn ghost">{p.active ? 'Disable' : 'Enable'}</button>
-                      </form>
+                      </ActionForm>
                     ) : null}
                   </td>
                 </tr>

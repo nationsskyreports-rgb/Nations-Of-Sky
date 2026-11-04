@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/auth';
 import { getBaseUrl } from '@/lib/server-utils';
 import { createBranch, updateBranch } from '@/app/dashboard/actions';
 import BranchQr from '@/components/BranchQr';
+import ActionForm from '@/components/ActionForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,15 +22,15 @@ export default async function Branches() {
         QR codes point to <b>{base}</b>. Check this is the final address before printing.
       </p>
 
-      <form className="d-card d-inline" action={createBranch}>
+      <ActionForm className="d-card d-inline" action={createBranch} success="Branch added" reset>
         <input name="name" placeholder="New branch name" required />
         <button className="d-btn">Add branch</button>
-      </form>
+      </ActionForm>
 
       <div className="d-cards">
         {(branches || []).map((b) => (
           <section className="d-card" key={b.id}>
-            <form className="d-form" action={updateBranch}>
+            <ActionForm className="d-form" action={updateBranch} success="Branch saved">
               <input type="hidden" name="id" value={b.id} />
               <label>
                 Name
@@ -40,7 +41,7 @@ export default async function Branches() {
                 Active
               </label>
               <button className="d-btn ghost">Save</button>
-            </form>
+            </ActionForm>
             <BranchQr url={`${base}/r/${b.slug}`} fileName={`qr-${b.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} />
             <Link className="d-btn" href={`/dashboard/branches/${b.id}/card`}>
               Printable card

@@ -2,6 +2,7 @@ import { requireAdmin } from '@/lib/auth';
 import { getSettings } from '@/lib/settings';
 import { SETTING_GROUPS } from '@/lib/config';
 import { saveSettings } from '@/app/dashboard/actions';
+import ActionForm from '@/components/ActionForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,7 @@ export default async function Settings() {
         <h1>Settings</h1>
       </div>
 
-      <form className="d-cards one" action={saveSettings}>
+      <ActionForm className="d-cards one" action={saveSettings} success="Settings saved">
         {SETTING_GROUPS.map((group) => (
           <section className="d-card d-form" key={group.title}>
             <h2>{group.title}</h2>
@@ -42,7 +43,7 @@ export default async function Settings() {
         <div className="d-actions">
           <button className="d-btn">Save settings</button>
         </div>
-      </form>
+      </ActionForm>
     </div>
   );
 }
