@@ -7,12 +7,17 @@ const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 function Lock({ open }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      {open ? <path d="M8 11V8a4 4 0 0 1 7.5-2" /> : <path d="M8 11V8a4 4 0 0 1 8 0v3" />}
-    </svg>
+    <span className="vc-gift-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+        <rect x="5" y="11" width="14" height="9" rx="2" />
+        {open ? <path d="M8 11V8a4 4 0 0 1 7.5-2" /> : <path d="M8 11V8a4 4 0 0 1 8 0v3" />}
+      </svg>
+    </span>
   );
 }
+
+const RATING_LABELS = ['Poor', 'Fair', 'Good', 'Very good', 'Excellent'];
+const STEPS = ['intro', 'details', 'done'];
 
 function Question({ q, value, onChange }) {
   const options = Array.isArray(q.options) ? q.options : [];
@@ -211,7 +216,7 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
   const showReward = settings.reward_enabled === 'true';
   const minGoogle = parseInt(settings.google_min_rating, 10) || 5;
   const showGoogle = settings.google_review_url && rating >= minGoogle;
-  const progress = step === 'intro' ? 0 : step === 'details' ? 66 : 100;
+  const stepIndex = STEPS.indexOf(step);
   const active = hover || rating;
 
   return (
@@ -227,28 +232,31 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
             <h1 className="vc-title">{settings.intro_headline}</h1>
             <p className="vc-sub">{settings.intro_sub}</p>
 
-            <p className="vc-ask">{staffName ? `How was your visit with ${staffName}?` : 'How was your visit?'}</p>
-            <div className="vc-stars" onMouseLeave={() => setHover(0)}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  type="button"
-                  key={n}
-                  aria-label={`${n} star${n > 1 ? 's' : ''}`}
-                  className={`vc-star ${n <= active ? 'on' : ''}`}
-                  onMouseEnter={() => setHover(n)}
-                  onClick={() => pick(n)}
-                >
-                  <svg viewBox="0 0 24 24" width="44" height="44">
-                    <path d={STAR} />
-                  </svg>
-                </button>
-              ))}
+            <div className="vc-rate">
+              <p className="vc-ask">{staffName ? `How was your visit with ${staffName}?` : 'How was your visit?'}</p>
+              <div className="vc-stars" onMouseLeave={() => setHover(0)}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    type="button"
+                    key={n}
+                    aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                    className={`vc-star ${n <= active ? 'on' : ''}`}
+                    onMouseEnter={() => setHover(n)}
+                    onClick={() => pick(n)}
+                  >
+                    <svg viewBox="0 0 24 24" width="46" height="46">
+                      <path d={STAR} />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+              <p className="vc-rate-label">{active ? RATING_LABELS[active - 1] : 'Tap a star'}</p>
             </div>
 
             {showReward && (
               <div className="vc-gift locked">
                 <Lock />
-                <div>
+                <div className="vc-gift-text">
                   <strong>A surprise is waiting for you</strong>
                   <span>Unlocks right after your feedback</span>
                 </div>
@@ -288,7 +296,7 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
             {showReward && (
               <div className="vc-gift open">
                 <Lock open />
-                <div>
+                <div className="vc-gift-text">
                   <strong>{settings.reward_title}</strong>
                   <span>{settings.reward_body}</span>
                   {settings.reward_code ? <b className="vc-code">{settings.reward_code}</b> : null}
@@ -310,8 +318,10 @@ export default function SurveyFlow({ branchSlug, token, customerName, staffName,
           </section>
         )}
 
-        <div className="vc-progress" aria-hidden="true">
-          <i style={{ width: `${progress}%` }} />
+        <div className="vc-steps" aria-hidden="true">
+          {STEPS.map((name, i) => (
+            <i key={name} className={i <= stepIndex ? 'on' : ''} />
+          ))}
         </div>
         <p className="vc-foot">Nations of Sky</p>
       </div>
