@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { buildQrSvg, logoDataUrl } from '@/lib/qr';
+import { buildQrSvg, flatLogoDataUrl } from '@/lib/qr';
 
 export default function PrintCard({ url, branchName }) {
   const [svg, setSvg] = useState('');
 
   useEffect(() => {
     let alive = true;
-    logoDataUrl()
+    flatLogoDataUrl()
       .then((logo) => alive && setSvg(buildQrSvg(url, { logo, margin: 1 })))
       .catch(() => alive && setSvg(buildQrSvg(url, { margin: 1 })));
     return () => {
@@ -28,10 +28,12 @@ export default function PrintCard({ url, branchName }) {
       </div>
 
       <div className="pc-card">
-        <div className="pc-inner">
-          <img src="/logo.png" alt="" className="pc-logo" />
+        <div className="pc-top">
+          <span className="pc-logo" aria-hidden="true" />
           <p className="pc-eyebrow">Voice of Customer</p>
           <h2 className="pc-title">We Hear. We Act. We Deliver.</h2>
+        </div>
+        <div className="pc-bottom">
           <div className="pc-qr" dangerouslySetInnerHTML={{ __html: svg }} />
           <p className="pc-scan">Scan to rate your visit</p>
           <p className="pc-foot">Your feedback helps us improve.</p>
