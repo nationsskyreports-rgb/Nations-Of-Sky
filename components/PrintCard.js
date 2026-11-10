@@ -1,10 +1,17 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { buildQrSvg, logoDataUrl } from '@/lib/qr';
 
+const DESIGNS = [
+  ['mono', 'Black & white'],
+  ['dark', 'Black & gold'],
+];
+
 export default function PrintCard({ url, branchName }) {
   const [svg, setSvg] = useState('');
+  const [design, setDesign] = useState('mono');
 
   useEffect(() => {
     let alive = true;
@@ -16,30 +23,61 @@ export default function PrintCard({ url, branchName }) {
     };
   }, [url]);
 
+  const qr = <div className="pc-qr" dangerouslySetInnerHTML={{ __html: svg }} />;
+
   return (
     <div className="pc-page">
       <div className="pc-bar no-print">
-        <p>
-          {branchName}. Print on A5, background graphics on, margins none. Matte or soft-touch paper works best.
-        </p>
+        <Link className="d-btn ghost" href="/dashboard/branches">
+          &larr; Back to QR codes
+        </Link>
+        <div className="pc-choose">
+          {DESIGNS.map(([value, label]) => (
+            <button
+              type="button"
+              key={value}
+              className={`d-btn ${design === value ? '' : 'ghost'}`}
+              onClick={() => setDesign(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <button className="d-btn" onClick={() => window.print()}>
           Print
         </button>
+        <p>
+          {branchName}. Print on A5, background graphics on, margins none. Matte or soft-touch paper works best.
+        </p>
       </div>
 
-      <div className="pc-card">
-        <div className="pc-top">
-          <img src="/logo.png" alt="" className="pc-logo" />
-          <p className="pc-eyebrow">Voice of Customer</p>
-          <h2 className="pc-title">We Hear. We Act. We Deliver.</h2>
+      {design === 'mono' ? (
+        <div className="pc-card mono">
+          <div className="pc-top">
+            <img src="/logo.png" alt="" className="pc-logo" />
+            <p className="pc-eyebrow">Voice of Customer</p>
+            <h2 className="pc-title">We Hear. We Act. We Deliver.</h2>
+          </div>
+          <div className="pc-bottom">
+            {qr}
+            <p className="pc-scan">Scan to rate your visit</p>
+            <p className="pc-foot">Your feedback helps us improve.</p>
+            <p className="pc-brand">Nations of Sky</p>
+          </div>
         </div>
-        <div className="pc-bottom">
-          <div className="pc-qr" dangerouslySetInnerHTML={{ __html: svg }} />
-          <p className="pc-scan">Scan to rate your visit</p>
-          <p className="pc-foot">Your feedback helps us improve.</p>
-          <p className="pc-brand">Nations of Sky</p>
+      ) : (
+        <div className="pc-card dark">
+          <div className="pc-inner">
+            <img src="/logo.png" alt="" className="pc-logo" />
+            <p className="pc-eyebrow">Voice of Customer</p>
+            <h2 className="pc-title">We Hear. We Act. We Deliver.</h2>
+            {qr}
+            <p className="pc-scan">Scan to rate your visit</p>
+            <p className="pc-foot">Your feedback helps us improve.</p>
+            <p className="pc-brand">Nations of Sky</p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

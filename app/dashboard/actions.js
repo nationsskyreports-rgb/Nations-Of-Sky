@@ -36,20 +36,20 @@ async function run(work) {
   }
 }
 
-/* ---------- Branches ---------- */
+/* ---------- QR codes ---------- */
 
 export async function createBranch(formData) {
   return run(async () => {
     await needAdmin();
     const name = text(formData, 'name');
-    if (!name) throw new Error('Enter a branch name.');
+    if (!name) throw new Error('Enter a name.');
     for (let i = 0; i < 5; i++) {
       const { error } = await admin().from('branches').insert({ name, slug: randomSlug() });
       if (!error) break;
       if (error.code !== '23505') throw new Error(error.message);
     }
     revalidatePath('/dashboard/branches');
-    return 'Branch added';
+    return 'QR code added';
   });
 }
 
@@ -58,7 +58,7 @@ export async function updateBranch(formData) {
     await needAdmin();
     const id = text(formData, 'id');
     const name = text(formData, 'name');
-    if (!id || !name) throw new Error('Enter a branch name.');
+    if (!id || !name) throw new Error('Enter a name.');
     must(
       await admin()
         .from('branches')
@@ -66,7 +66,7 @@ export async function updateBranch(formData) {
         .eq('id', id)
     );
     revalidatePath('/dashboard/branches');
-    return 'Branch saved';
+    return 'QR code saved';
   });
 }
 
@@ -145,7 +145,9 @@ export async function questionAction(formData) {
 export async function saveSettings(formData) {
   return run(async () => {
     await needAdmin();
-    const rows = Object.keys(DEFAULT_SETTINGS).map((key) => ({ key, value: text(formData, key) }));
+    const rows = Object.keys(DEFAULT_SETTINGS)
+      .filter((key) => formData.has(key))
+      .map((key) => ({ key, value: text(formData, key) }));
     must(await admin().from('settings').upsert(rows, { onConflict: 'key' }));
     revalidatePath('/dashboard/settings');
     return 'Settings saved';
@@ -196,7 +198,7 @@ export async function createVisit({ branchId, name, phone, lang }) {
   if (!normalized) return { error: 'Enter a valid mobile number.' };
 
   const { data: branch } = await db.from('branches').select('id, name, active').eq('id', branchId).maybeSingle();
-  if (!branch || !branch.active) return { error: 'Choose a branch.' };
+  if (!branch || !branch.active) return { error: 'Choose a QR code.' };
 
   const customer = String(name || '').trim().slice(0, 120);
   const token = randomToken();

@@ -51,7 +51,7 @@ export default function SendForm({ branches }) {
   return (
     <form className="d-card d-form" onSubmit={submit}>
       <label>
-        Branch
+        QR code
         <select value={branchId} onChange={(e) => setBranchId(e.target.value)} required>
           {branches.map((b) => (
             <option key={b.id} value={b.id}>

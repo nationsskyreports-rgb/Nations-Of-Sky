@@ -76,7 +76,7 @@ export default async function Responses({ searchParams }) {
           fields={[
             { name: 'status', defaultValue: '', options: STATUSES },
             { name: 'range', defaultValue: '30d', options: RANGES },
-            { name: 'branch', defaultValue: '', options: [['', 'All branches'], ...(branches || []).map((b) => [b.id, b.name])] },
+            { name: 'branch', defaultValue: '', options: [['', 'All QR codes'], ...(branches || []).map((b) => [b.id, b.name])] },
             { name: 'source', defaultValue: '', options: [['', 'QR + WhatsApp'], ['qr', 'QR code'], ['whatsapp', 'WhatsApp link']] },
           ]}
         />
@@ -90,7 +90,7 @@ export default async function Responses({ searchParams }) {
             <thead>
               <tr>
                 <th>When</th>
-                <th>Branch</th>
+                <th>QR code</th>
                 <th>Source</th>
                 <th>Device</th>
                 <th>Location</th>

@@ -16,21 +16,21 @@ export default async function Branches() {
   return (
     <div className="d-page">
       <div className="d-head">
-        <h1>Branches</h1>
+        <h1>QR codes</h1>
       </div>
       <p className="d-note">
         QR codes point to <b>{base}</b>. Check this is the final address before printing.
       </p>
 
-      <ActionForm className="d-card d-inline" action={createBranch} success="Branch added" reset>
-        <input name="name" placeholder="New branch name" required />
-        <button className="d-btn">Add branch</button>
+      <ActionForm className="d-card d-inline" action={createBranch} success="QR code added" reset>
+        <input name="name" placeholder="New QR code name" required />
+        <button className="d-btn">Add QR code</button>
       </ActionForm>
 
       <div className="d-cards">
         {(branches || []).map((b) => (
           <section className="d-card" key={b.id}>
-            <ActionForm className="d-form" action={updateBranch} success="Branch saved">
+            <ActionForm className="d-form" action={updateBranch} success="QR code saved">
               <input type="hidden" name="id" value={b.id} />
               <label>
                 Name
@@ -48,7 +48,7 @@ export default async function Branches() {
             </Link>
           </section>
         ))}
-        {!(branches || []).length && <p className="d-note">No branches yet. Add the first one above.</p>}
+        {!(branches || []).length && <p className="d-note">No QR codes yet. Add the first one above.</p>}
       </div>
     </div>
   );

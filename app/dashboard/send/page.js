@@ -28,7 +28,7 @@ export default async function SendPage() {
       {(branches || []).length ? (
         <SendForm branches={branches} />
       ) : (
-        <p className="d-note">No active branches yet. An admin needs to add one first.</p>
+        <p className="d-note">No active QR codes yet. An admin needs to add one first.</p>
       )}
 
       <section className="d-card">
@@ -39,7 +39,7 @@ export default async function SendPage() {
               <tr>
                 <th>When</th>
                 <th>Customer</th>
-                <th>Branch</th>
+                <th>QR code</th>
                 <th>By</th>
                 <th>Status</th>
               </tr>

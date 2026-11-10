@@ -15,17 +15,6 @@ const makeTone = (settings) => {
 };
 const HEX = /^#[0-9a-f]{6}$/i;
 
-function Lock({ open }) {
-  return (
-    <span className="vc-gift-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-        <rect x="5" y="11" width="14" height="9" rx="2" />
-        {open ? <path d="M8 11V8a4 4 0 0 1 7.5-2" /> : <path d="M8 11V8a4 4 0 0 1 8 0v3" />}
-      </svg>
-    </span>
-  );
-}
-
 function Question({ q, value, onChange, lang, t, tone }) {
   const options = Array.isArray(q.options) ? q.options : [];
   const optionsAr = Array.isArray(q.options_ar) ? q.options_ar : [];
@@ -265,12 +254,8 @@ export default function SurveyFlow({
   };
 
   const first = (customerName || '').trim().split(/\s+/)[0];
-  const showReward = settings.reward_enabled === 'true';
-  const minGoogle = parseInt(settings.google_min_rating, 10) || 5;
-  const showGoogle = settings.google_review_url && rating >= minGoogle;
   const stepIndex = STEPS.indexOf(step);
   const active = hover || rating;
-  const rewardLabel = S('reward_link_label');
 
   return (
     <main className="vc-shell" dir={dir} lang={lang} style={themeVars}>
@@ -292,7 +277,7 @@ export default function SurveyFlow({
 
             <div className="vc-rate">
               <p className="vc-ask">
-                {staffName ? t.askVisitStaff.replace('{staff}', staffName) : t.askVisit}
+                {t.askVisit}
               </p>
               <div className="vc-stars" onMouseLeave={() => setHover(0)}>
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -312,16 +297,6 @@ export default function SurveyFlow({
               </div>
               <p className="vc-rate-label">{active ? t.ratings[active - 1] : t.tapStar}</p>
             </div>
-
-            {showReward && (
-              <div className="vc-gift locked">
-                <Lock />
-                <div className="vc-gift-text">
-                  <strong>{t.giftLockedTitle}</strong>
-                  <span>{t.giftLockedText}</span>
-                </div>
-              </div>
-            )}
           </section>
         )}
 
@@ -350,7 +325,7 @@ export default function SurveyFlow({
             </div>
 
             <button type="button" className="vc-btn" disabled={!canSubmit || busy} onClick={submit}>
-              {busy ? t.sending : showReward ? t.unlock : t.send}
+              {busy ? t.sending : t.send}
             </button>
             <button type="button" className="vc-back" onClick={() => setStep('intro')}>
               <span aria-hidden="true">{lang === 'ar' ? '→' : '←'}</span> {t.back}
@@ -362,29 +337,6 @@ export default function SurveyFlow({
           <section className="vc-fade" key="done">
             <h1 className="vc-title">{S('thanks_title')}</h1>
             <p className="vc-sub">{S('thanks_body')}</p>
-
-            {showReward && (
-              <div className="vc-gift open">
-                <Lock open />
-                <div className="vc-gift-text">
-                  <strong>{S('reward_title')}</strong>
-                  <span>{S('reward_body')}</span>
-                  {settings.reward_code ? <b className="vc-code">{settings.reward_code}</b> : null}
-                </div>
-              </div>
-            )}
-
-            {settings.reward_link_url && rewardLabel ? (
-              <a className="vc-btn" href={settings.reward_link_url} target="_blank" rel="noopener noreferrer">
-                {rewardLabel}
-              </a>
-            ) : null}
-
-            {showGoogle ? (
-              <a className="vc-btn ghost" href={settings.google_review_url} target="_blank" rel="noopener noreferrer">
-                {t.google}
-              </a>
-            ) : null}
           </section>
         )}
 

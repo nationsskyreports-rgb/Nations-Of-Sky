@@ -126,7 +126,7 @@ export default async function Overview({ searchParams }) {
         <AutoFilters
           fields={[
             { name: 'range', defaultValue: '30d', options: RANGES },
-            { name: 'branch', defaultValue: '', options: [['', 'All branches'], ...(branches || []).map((b) => [b.id, b.name])] },
+            { name: 'branch', defaultValue: '', options: [['', 'All QR codes'], ...(branches || []).map((b) => [b.id, b.name])] },
           ]}
         />
       </div>
@@ -165,12 +165,12 @@ export default async function Overview({ searchParams }) {
       </div>
 
       <section className="d-card">
-        <h2>By branch</h2>
+        <h2>By QR code</h2>
         <div className="d-table-wrap">
           <table className="d-table">
             <thead>
               <tr>
-                <th>Branch</th>
+                <th>QR code</th>
                 <th>Scans</th>
                 <th>Rated</th>
                 <th>Completed</th>
@@ -190,7 +190,7 @@ export default async function Overview({ searchParams }) {
               {!byBranch.length && (
                 <tr>
                   <td colSpan="5" className="d-empty">
-                    No branches yet.
+                    No QR codes yet.
                   </td>
                 </tr>
               )}
@@ -206,7 +206,7 @@ export default async function Overview({ searchParams }) {
             <thead>
               <tr>
                 <th>When</th>
-                <th>Branch</th>
+                <th>QR code</th>
                 <th>Rating</th>
                 <th>Name</th>
                 <th>Mobile</th>

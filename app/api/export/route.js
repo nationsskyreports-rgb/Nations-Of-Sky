@@ -35,7 +35,7 @@ export async function GET(req) {
 
   const header = [
     'Time',
-    'Branch',
+    'QR code',
     'Source',
     'Staff',
     'Device',

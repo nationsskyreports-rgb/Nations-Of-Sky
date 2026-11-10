@@ -17,7 +17,7 @@ export default async function DashboardLayout({ children }) {
   ];
   if (isAdmin) {
     links.push(
-      ['/dashboard/branches', 'Branches'],
+      ['/dashboard/branches', 'QR codes'],
       ['/dashboard/questions', 'Questions'],
       ['/dashboard/settings', 'Settings'],
       ['/dashboard/team', 'Team']

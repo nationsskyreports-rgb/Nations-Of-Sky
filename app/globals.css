@@ -1640,12 +1640,65 @@ body:has(.light) {
   color: #555;
 }
 
+.pc-choose {
+  display: flex;
+  gap: 8px;
+}
+
 .pc-brand {
   margin: 0;
-  font-size: 8pt;
-  letter-spacing: 0.4em;
+  font-size: 13pt;
+  font-weight: 800;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: #555;
+  color: #0a0a0a;
+}
+
+/* Black & gold design */
+.pc-card.dark {
+  background: #0a0a0a;
+  color: #f5f1e6;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+}
+
+.pc-card.dark .pc-inner {
+  width: calc(100% - 16mm);
+  height: calc(100% - 16mm);
+  border: 0.4mm solid #f4c841;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10mm;
+}
+
+.pc-card.dark .pc-eyebrow {
+  color: #f4c841;
+}
+
+.pc-card.dark .pc-title {
+  margin: 0 0 9mm;
+  font-weight: 600;
+}
+
+.pc-card.dark .pc-qr {
+  border: 0;
+}
+
+.pc-card.dark .pc-scan {
+  color: #f4c841;
+}
+
+.pc-card.dark .pc-foot {
+  margin-bottom: 12mm;
+  color: #9a9484;
+}
+
+.pc-card.dark .pc-brand {
+  color: #f5f1e6;
 }
 
 @media print {
@@ -1664,6 +1717,13 @@ body:has(.light) {
   body:has(.light),
   .d-wrap {
     background: #fff !important;
+  }
+
+  html:has(.pc-card.dark),
+  body:has(.pc-card.dark),
+  html:has(.pc-card.dark) .d-wrap,
+  body:has(.pc-card.dark) .d-wrap {
+    background: #0a0a0a !important;
   }
 
   .d-body {
