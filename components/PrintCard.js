@@ -9,9 +9,17 @@ const DESIGNS = [
   ['dark', 'Black & gold'],
 ];
 
+const SLOGANS = [
+  ['We Listen. We Care. We Soar.', 'Version 1'],
+  ['Your Voice. Our Vision. One Nation.', 'Version 2'],
+];
+
+const QR_LINE = 'Your Voice Shapes Our Skyline';
+
 export default function PrintCard({ url, branchName }) {
   const [svg, setSvg] = useState('');
   const [design, setDesign] = useState('mono');
+  const [slogan, setSlogan] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -24,6 +32,7 @@ export default function PrintCard({ url, branchName }) {
   }, [url]);
 
   const qr = <div className="pc-qr" dangerouslySetInnerHTML={{ __html: svg }} />;
+  const title = SLOGANS[slogan][0];
 
   return (
     <div className="pc-page">
@@ -43,6 +52,19 @@ export default function PrintCard({ url, branchName }) {
             </button>
           ))}
         </div>
+        <div className="pc-choose">
+          {SLOGANS.map(([text, label], i) => (
+            <button
+              type="button"
+              key={label}
+              className={`d-btn ${slogan === i ? '' : 'ghost'}`}
+              title={text}
+              onClick={() => setSlogan(i)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <button className="d-btn" onClick={() => window.print()}>
           Print
         </button>
@@ -56,12 +78,12 @@ export default function PrintCard({ url, branchName }) {
           <div className="pc-top">
             <img src="/logo.png" alt="" className="pc-logo" />
             <p className="pc-eyebrow">Voice of Customer</p>
-            <h2 className="pc-title">We Hear. We Act. We Deliver.</h2>
+            <h2 className="pc-title">{title}</h2>
           </div>
           <div className="pc-bottom">
             {qr}
-            <p className="pc-scan">Scan to rate your visit</p>
-            <p className="pc-foot">Your feedback helps us improve.</p>
+            <p className="pc-scan">{QR_LINE}</p>
+            <p className="pc-foot">Scan to rate your visit</p>
             <p className="pc-brand">Nations of Sky</p>
           </div>
         </div>
@@ -70,10 +92,10 @@ export default function PrintCard({ url, branchName }) {
           <div className="pc-inner">
             <img src="/logo.png" alt="" className="pc-logo" />
             <p className="pc-eyebrow">Voice of Customer</p>
-            <h2 className="pc-title">We Hear. We Act. We Deliver.</h2>
+            <h2 className="pc-title">{title}</h2>
             {qr}
-            <p className="pc-scan">Scan to rate your visit</p>
-            <p className="pc-foot">Your feedback helps us improve.</p>
+            <p className="pc-scan">{QR_LINE}</p>
+            <p className="pc-foot">Scan to rate your visit</p>
             <p className="pc-brand">Nations of Sky</p>
           </div>
         </div>
