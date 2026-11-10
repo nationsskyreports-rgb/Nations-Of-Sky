@@ -1555,19 +1555,20 @@ body:has(.light) {
 .pc-card {
   width: 148mm;
   height: 210mm;
-  background: #0a0a0a;
-  color: #f5f1e6;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  background: #fff;
+  color: #0a0a0a;
+  border: 0.3mm solid #0a0a0a;
+  box-sizing: border-box;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
-.pc-inner {
-  width: calc(100% - 16mm);
-  height: calc(100% - 16mm);
-  border: 0.4mm solid #f4c841;
+.pc-top {
+  flex: 0 0 42%;
+  background: #0a0a0a;
+  color: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1577,9 +1578,13 @@ body:has(.light) {
 }
 
 .pc-logo {
+  display: block;
   width: 18mm;
   height: 18mm;
   margin-bottom: 5mm;
+  background: #fff;
+  -webkit-mask: url('/logo.png') center / contain no-repeat;
+  mask: url('/logo.png') center / contain no-repeat;
 }
 
 .pc-eyebrow {
@@ -1587,15 +1592,25 @@ body:has(.light) {
   font-size: 9pt;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: #f4c841;
+  color: #fff;
 }
 
 .pc-title {
-  margin: 0 0 9mm;
+  margin: 0;
   font-family: var(--serif);
-  font-weight: 500;
+  font-weight: 700;
   font-size: 24pt;
   line-height: 1.15;
+}
+
+.pc-bottom {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8mm;
 }
 
 .pc-qr {
@@ -1603,6 +1618,7 @@ body:has(.light) {
   height: 70mm;
   padding: 3mm;
   background: #fff;
+  border: 0.5mm solid #0a0a0a;
   border-radius: 3mm;
 }
 
@@ -1615,15 +1631,16 @@ body:has(.light) {
 .pc-scan {
   margin: 7mm 0 2mm;
   font-size: 11pt;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #f4c841;
+  color: #0a0a0a;
 }
 
 .pc-foot {
-  margin: 0 0 12mm;
+  margin: 0 0 8mm;
   font-size: 9pt;
-  color: #9a9484;
+  color: #555;
 }
 
 .pc-brand {
@@ -1631,7 +1648,7 @@ body:has(.light) {
   font-size: 8pt;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: #9a9484;
+  color: #555;
 }
 
 @media print {
@@ -1649,7 +1666,7 @@ body:has(.light) {
   html:has(.light),
   body:has(.light),
   .d-wrap {
-    background: #0a0a0a !important;
+    background: #fff !important;
   }
 
   .d-body {
