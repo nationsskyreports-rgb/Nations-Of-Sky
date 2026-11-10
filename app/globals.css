@@ -1582,9 +1582,6 @@ body:has(.light) {
   width: 18mm;
   height: 18mm;
   margin-bottom: 5mm;
-  background: #fff;
-  -webkit-mask: url('/logo.png') center / contain no-repeat;
-  mask: url('/logo.png') center / contain no-repeat;
 }
 
 .pc-eyebrow {
