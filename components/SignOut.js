@@ -1,20 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { supabaseBrowser } from '@/lib/supabase-browser';
+import { signOut } from '@/app/auth-actions';
 
 export default function SignOut() {
-  const router = useRouter();
   return (
-    <button
-      className="d-link"
-      onClick={async () => {
-        await supabaseBrowser().auth.signOut();
-        router.replace('/login');
-        router.refresh();
-      }}
-    >
-      Sign out
-    </button>
+    <form action={signOut}>
+      <button className="d-link" type="submit">
+        Sign out
+      </button>
+    </form>
   );
 }

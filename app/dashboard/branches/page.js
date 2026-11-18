@@ -16,39 +16,46 @@ export default async function Branches() {
   return (
     <div className="d-page">
       <div className="d-head">
-        <h1>QR codes</h1>
+        <h1>QR code</h1>
       </div>
       <p className="d-note">
-        QR codes point to <b>{base}</b>. Check this is the final address before printing.
+        One QR code for every branch. The customer picks the branch inside the survey. It points to{' '}
+        <b>{base}/r</b> &mdash; check this is the final address before printing.
       </p>
 
-      <ActionForm className="d-card d-inline" action={createBranch} success="QR code added" reset>
-        <input name="name" placeholder="New QR code name" required />
-        <button className="d-btn">Add QR code</button>
+      <section className="d-card">
+        <BranchQr url={`${base}/r`} fileName="nations-of-sky-qr" />
+        <Link className="d-btn" href="/dashboard/card">
+          Printable card
+        </Link>
+      </section>
+
+      <div className="d-head">
+        <h1>Branches</h1>
+      </div>
+      <p className="d-note">Active branches are the choices the customer sees after scanning.</p>
+
+      <ActionForm className="d-card d-inline" action={createBranch} success="Branch added" reset>
+        <input name="name" placeholder="New branch name" required />
+        <button className="d-btn">Add branch</button>
       </ActionForm>
 
       <div className="d-cards">
         {(branches || []).map((b) => (
-          <section className="d-card" key={b.id}>
-            <ActionForm className="d-form" action={updateBranch} success="QR code saved">
-              <input type="hidden" name="id" value={b.id} />
-              <label>
-                Name
-                <input name="name" defaultValue={b.name} required />
-              </label>
-              <label className="d-check">
-                <input type="checkbox" name="active" defaultChecked={b.active} />
-                Active
-              </label>
-              <button className="d-btn ghost">Save</button>
-            </ActionForm>
-            <BranchQr url={`${base}/r/${b.slug}`} fileName={`qr-${b.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} />
-            <Link className="d-btn" href={`/dashboard/branches/${b.id}/card`}>
-              Printable card
-            </Link>
-          </section>
+          <ActionForm className="d-card d-form" action={updateBranch} success="Branch saved" key={b.id}>
+            <input type="hidden" name="id" value={b.id} />
+            <label>
+              Name
+              <input name="name" defaultValue={b.name} required />
+            </label>
+            <label className="d-check">
+              <input type="checkbox" name="active" defaultChecked={b.active} />
+              Shown to customers
+            </label>
+            <button className="d-btn ghost">Save</button>
+          </ActionForm>
         ))}
-        {!(branches || []).length && <p className="d-note">No QR codes yet. Add the first one above.</p>}
+        {!(branches || []).length && <p className="d-note">No branches yet. Add the first one above.</p>}
       </div>
     </div>
   );

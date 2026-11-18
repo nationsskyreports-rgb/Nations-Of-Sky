@@ -1,38 +1,19 @@
-import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
+import { SESSION_COOKIE, sessionToken } from '@/lib/gate';
 
 export async function middleware(request) {
-  let response = NextResponse.next({ request });
+  const password = process.env.DASHBOARD_PASSWORD || '';
+  const expected = password ? await sessionToken(password) : '';
+  const current = request.cookies.get(SESSION_COOKIE)?.value;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(list) {
-          list.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        },
-      },
-    }
-  );
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!expected || current !== expected) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.search = '';
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

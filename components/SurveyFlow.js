@@ -5,7 +5,8 @@ import { buildText } from '@/lib/i18n';
 
 const STAR = 'M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.2 1.2-6.5L2.5 9.5l6.6-.9L12 2.6z';
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
-const STEPS = ['intro', 'details', 'done'];
+const WITH_BRANCH = ['branch', 'intro', 'details', 'done'];
+const WITHOUT_BRANCH = ['intro', 'details', 'done'];
 
 // Score colours: thresholds come from settings (green from X, yellow from Y, the rest red).
 const makeTone = (settings) => {
@@ -89,6 +90,7 @@ function Question({ q, value, onChange, lang, t, tone }) {
 export default function SurveyFlow({
   branchSlug,
   token,
+  branches = [],
   customerName,
   staffName,
   questions,
@@ -96,8 +98,14 @@ export default function SurveyFlow({
   initialLang = 'en',
   langLocked = false,
 }) {
+  // One QR for every branch: the customer picks the branch before anything else.
+  const needsBranch = branches.length > 0;
+  const STEPS = needsBranch ? WITH_BRANCH : WITHOUT_BRANCH;
+  const firstStep = needsBranch ? 'branch' : 'intro';
+
   const [lang, setLang] = useState(initialLang);
-  const [step, setStep] = useState('intro');
+  const [step, setStep] = useState(firstStep);
+  const [branchId, setBranchId] = useState('');
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -107,10 +115,12 @@ export default function SurveyFlow({
   const scanIdRef = useRef(null);
   const ratingRef = useRef(0);
   const answersRef = useRef({});
-  const stepRef = useRef('intro');
+  const stepRef = useRef(firstStep);
+  const branchRef = useRef('');
   ratingRef.current = rating;
   answersRef.current = answers;
   stepRef.current = step;
+  branchRef.current = branchId;
 
   const t = buildText(settings, lang);
   const tone = makeTone(settings);
@@ -165,6 +175,7 @@ export default function SurveyFlow({
       body: JSON.stringify({
         branchSlug,
         token,
+        pick: needsBranch,
         sessionId: sid,
         screen: `${window.screen.width}x${window.screen.height}`,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -177,7 +188,7 @@ export default function SurveyFlow({
         return scanIdRef.current;
       })
       .catch(() => null);
-  }, [branchSlug, token]);
+  }, [branchSlug, token, needsBranch]);
 
   const save = useCallback(async (payload) => {
     const id = await scanPromise.current;
@@ -187,7 +198,7 @@ export default function SurveyFlow({
         method: 'POST',
         headers: JSON_HEADERS,
         keepalive: true,
-        body: JSON.stringify({ scanId: id, ...payload }),
+        body: JSON.stringify({ scanId: id, branchId: branchRef.current || undefined, ...payload }),
       });
       return res.ok;
     } catch {
@@ -208,6 +219,7 @@ export default function SurveyFlow({
       if (!scanIdRef.current || stepRef.current === 'done') return;
       const body = JSON.stringify({
         scanId: scanIdRef.current,
+        branchId: branchRef.current || undefined,
         rating: ratingRef.current || undefined,
         answers: answersRef.current,
       });
@@ -218,6 +230,13 @@ export default function SurveyFlow({
     window.addEventListener('pagehide', onHide);
     return () => window.removeEventListener('pagehide', onHide);
   }, []);
+
+  const pickBranch = (id) => {
+    setBranchId(id);
+    branchRef.current = id;
+    save({ branchId: id });
+    setStep('intro');
+  };
 
   const pick = (n) => {
     if (step !== 'intro') return;
@@ -269,6 +288,29 @@ export default function SurveyFlow({
         <span className="vc-logo" aria-hidden="true" />
         <p className="vc-eyebrow">{t.brand}</p>
 
+        {step === 'branch' && (
+          <section className="vc-fade" key="branch">
+            <h1 className="vc-title">{S('intro_headline')}</h1>
+            <p className="vc-sub">{S('intro_sub')}</p>
+
+            <div className="vc-rate">
+              <p className="vc-ask">{t.pickBranch}</p>
+              <div className="vc-pills vc-branches">
+                {branches.map((b) => (
+                  <button
+                    type="button"
+                    key={b.id}
+                    className={`vc-pill ${branchId === b.id ? 'on' : ''}`}
+                    onClick={() => pickBranch(b.id)}
+                  >
+                    {b.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {step === 'intro' && (
           <section className="vc-fade" key="intro">
             <p className="vc-hello">{first ? t.hello.replace('{name}', first) : t.welcome}</p>
@@ -297,6 +339,12 @@ export default function SurveyFlow({
               </div>
               <p className="vc-rate-label">{active ? t.ratings[active - 1] : t.tapStar}</p>
             </div>
+
+            {needsBranch ? (
+              <button type="button" className="vc-back" onClick={() => setStep('branch')}>
+                <span aria-hidden="true">{lang === 'ar' ? '→' : '←'}</span> {t.back}
+              </button>
+            ) : null}
           </section>
         )}
 

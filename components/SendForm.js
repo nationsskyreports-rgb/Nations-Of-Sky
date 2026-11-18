@@ -8,6 +8,7 @@ export default function SendForm({ branches }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [lang, setLang] = useState('en');
+  const [staffName, setStaffName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
@@ -17,6 +18,7 @@ export default function SendForm({ branches }) {
     try {
       const saved = localStorage.getItem('voc_branch');
       if (saved && branches.some((b) => b.id === saved)) setBranchId(saved);
+      setStaffName(localStorage.getItem('voc_staff') || '');
     } catch {}
   }, [branches]);
 
@@ -27,8 +29,9 @@ export default function SendForm({ branches }) {
     setResult(null);
     try {
       localStorage.setItem('voc_branch', branchId);
+      localStorage.setItem('voc_staff', staffName.trim());
     } catch {}
-    const res = await createVisit({ branchId, name, phone, lang });
+    const res = await createVisit({ branchId, name, phone, lang, staffName });
     setBusy(false);
     if (res.error) {
       setError(res.error);
@@ -51,7 +54,17 @@ export default function SendForm({ branches }) {
   return (
     <form className="d-card d-form" onSubmit={submit}>
       <label>
-        QR code
+        Your name
+        <input
+          value={staffName}
+          onChange={(e) => setStaffName(e.target.value)}
+          placeholder="Shown in the report and in the message"
+          autoComplete="off"
+          required
+        />
+      </label>
+      <label>
+        Branch
         <select value={branchId} onChange={(e) => setBranchId(e.target.value)} required>
           {branches.map((b) => (
             <option key={b.id} value={b.id}>
@@ -83,7 +96,7 @@ export default function SendForm({ branches }) {
         />
       </label>
       {error ? <p className="vc-error">{error}</p> : null}
-      <button className="d-btn" disabled={busy || !branchId}>
+      <button className="d-btn" disabled={busy || !branchId || !staffName.trim()}>
         {busy ? 'Preparing...' : 'Send via WhatsApp'}
       </button>
 

@@ -5,7 +5,7 @@ import LoginForm from '@/components/LoginForm';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Sign in' };
 
-export default async function LoginPage({ searchParams }) {
+export default async function LoginPage() {
   const user = await getCurrentUser();
   if (user) redirect('/dashboard');
 
@@ -18,11 +18,11 @@ export default async function LoginPage({ searchParams }) {
         <div className="lg-pitch">
           <p className="lg-kicker">Voice of Customer</p>
           <h2>
-            We hear.
+            We Listen.
             <br />
-            We act.
+            We Care.
             <br />
-            We deliver.
+            We Go Beyond.
           </h2>
           <p>Every visit, every branch, one clear picture of how customers feel.</p>
         </div>
@@ -31,9 +31,9 @@ export default async function LoginPage({ searchParams }) {
 
       <section className="lg-main">
         <div className="lg-wrap">
-          <h1>Welcome back</h1>
-          <p className="lg-sub">Sign in to see your branches' feedback.</p>
-          <LoginForm denied={searchParams?.e === 'access'} />
+          <h1>Dashboard</h1>
+          <p className="lg-sub">Enter the team password to continue.</p>
+          <LoginForm />
         </div>
       </section>
     </main>

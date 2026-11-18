@@ -35,6 +35,19 @@ export async function POST(req) {
     updated_at: now,
   };
 
+  // The shared QR code leaves the branch empty until the customer picks it.
+  if (UUID.test(String(body.branchId || ''))) {
+    const { data: picked } = await db
+      .from('branches')
+      .select('id, active')
+      .eq('id', body.branchId)
+      .maybeSingle();
+    if (picked && picked.active) {
+      row.branch_id = picked.id;
+      if (!scan.branch_id) await db.from('scans').update({ branch_id: picked.id }).eq('id', scan.id);
+    }
+  }
+
   const rating = Number(body.rating);
   if (Number.isInteger(rating) && rating >= 1 && rating <= 5) row.rating = rating;
 

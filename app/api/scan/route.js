@@ -28,6 +28,9 @@ export async function POST(req) {
     visitId = visit.id;
     branchId = visit.branch_id;
     source = 'whatsapp';
+  } else if (body.pick) {
+    // Shared QR code: the branch is set once the customer picks it in the survey.
+    branchId = null;
   } else {
     const { data: branch } = await db
       .from('branches')

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabaseBrowser } from '@/lib/supabase-browser';
+import { signIn } from '@/app/auth-actions';
 
 function Eye({ off }) {
   return (
@@ -14,24 +14,19 @@ function Eye({ off }) {
   );
 }
 
-export default function LoginForm({ denied }) {
+export default function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
-  const [error, setError] = useState(denied ? 'This account has no access to the dashboard.' : '');
+  const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true);
     setError('');
-    const { error: err } = await supabaseBrowser().auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    if (err) {
-      setError('Wrong email or password.');
+    const result = await signIn(new FormData(e.currentTarget));
+    if (result?.error) {
+      setError(result.error);
       setBusy(false);
       return;
     }
@@ -42,27 +37,14 @@ export default function LoginForm({ denied }) {
   return (
     <form onSubmit={submit} className="lg-form">
       <label className="lg-label">
-        Email
-        <input
-          className="lg-input"
-          type="email"
-          autoComplete="email"
-          autoCapitalize="none"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </label>
-
-      <label className="lg-label">
         Password
         <span className="lg-field">
           <input
             className="lg-input"
+            name="password"
             type={show ? 'text' : 'password'}
             autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            autoFocus
             required
           />
           <button
@@ -79,7 +61,7 @@ export default function LoginForm({ denied }) {
       {error ? <p className="lg-error">{error}</p> : null}
 
       <button className="lg-btn" disabled={busy}>
-        {busy ? 'Signing in...' : 'Sign in'}
+        {busy ? 'Opening...' : 'Open dashboard'}
       </button>
     </form>
   );

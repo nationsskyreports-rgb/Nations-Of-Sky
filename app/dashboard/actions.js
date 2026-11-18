@@ -36,20 +36,20 @@ async function run(work) {
   }
 }
 
-/* ---------- QR codes ---------- */
+/* ---------- Branches ---------- */
 
 export async function createBranch(formData) {
   return run(async () => {
     await needAdmin();
     const name = text(formData, 'name');
-    if (!name) throw new Error('Enter a name.');
+    if (!name) throw new Error('Enter a branch name.');
     for (let i = 0; i < 5; i++) {
       const { error } = await admin().from('branches').insert({ name, slug: randomSlug() });
       if (!error) break;
       if (error.code !== '23505') throw new Error(error.message);
     }
     revalidatePath('/dashboard/branches');
-    return 'QR code added';
+    return 'Branch added';
   });
 }
 
@@ -58,7 +58,7 @@ export async function updateBranch(formData) {
     await needAdmin();
     const id = text(formData, 'id');
     const name = text(formData, 'name');
-    if (!id || !name) throw new Error('Enter a name.');
+    if (!id || !name) throw new Error('Enter a branch name.');
     must(
       await admin()
         .from('branches')
@@ -66,7 +66,7 @@ export async function updateBranch(formData) {
         .eq('id', id)
     );
     revalidatePath('/dashboard/branches');
-    return 'QR code saved';
+    return 'Branch saved';
   });
 }
 
@@ -154,51 +154,17 @@ export async function saveSettings(formData) {
   });
 }
 
-/* ---------- Team ---------- */
-
-export async function createUser(formData) {
-  return run(async () => {
-    await needAdmin();
-    const email = text(formData, 'email').toLowerCase();
-    const password = String(formData.get('password') || '');
-    const name = text(formData, 'name');
-    const role = text(formData, 'role') === 'admin' ? 'admin' : 'staff';
-    if (!email) throw new Error('Enter an email.');
-    if (password.length < 8) throw new Error('The password needs 8 characters or more.');
-
-    const db = admin();
-    const { data, error } = await db.auth.admin.createUser({ email, password, email_confirm: true });
-    if (error) throw new Error(error.message);
-    must(await db.from('profiles').upsert({ id: data.user.id, full_name: name || email, role, active: true }));
-    revalidatePath('/dashboard/team');
-    return 'User created';
-  });
-}
-
-export async function setUserActive(formData) {
-  return run(async () => {
-    const me = await needAdmin();
-    const id = text(formData, 'id');
-    if (!id || id === me.id) throw new Error('You cannot change your own account.');
-    const active = formData.get('active') === '1';
-    must(await admin().from('profiles').update({ active }).eq('id', id));
-    revalidatePath('/dashboard/team');
-    return active ? 'User enabled' : 'User disabled';
-  });
-}
-
-/* ---------- WhatsApp visit links ---------- */
-
-export async function createVisit({ branchId, name, phone, lang }) {
-  const user = await needUser();
+export async function createVisit({ branchId, name, phone, lang, staffName }) {
+  await needUser();
   const db = admin();
   const settings = await getSettings();
+  const staff = String(staffName || '').trim().slice(0, 80);
 
   const normalized = normalizePhone(phone, settings.default_country_code);
   if (!normalized) return { error: 'Enter a valid mobile number.' };
 
   const { data: branch } = await db.from('branches').select('id, name, active').eq('id', branchId).maybeSingle();
-  if (!branch || !branch.active) return { error: 'Choose a QR code.' };
+  if (!branch || !branch.active) return { error: 'Choose a branch.' };
 
   const customer = String(name || '').trim().slice(0, 120);
   const token = randomToken();
@@ -207,8 +173,7 @@ export async function createVisit({ branchId, name, phone, lang }) {
     branch_id: branch.id,
     customer_name: customer || null,
     customer_phone: normalized,
-    staff_id: user.id,
-    staff_name: user.name,
+    staff_name: staff || null,
   });
   if (error) return { error: 'Could not create the link.' };
 
@@ -218,7 +183,7 @@ export async function createVisit({ branchId, name, phone, lang }) {
   const message = template
     .replaceAll('{name}', customer || (ar ? 'عزيزي العميل' : 'there'))
     .replaceAll('{link}', link)
-    .replaceAll('{staff}', user.name)
+    .replaceAll('{staff}', staff)
     .replaceAll('{branch}', branch.name);
 
   revalidatePath('/dashboard/send');

@@ -10,7 +10,7 @@ const DESIGNS = [
 ];
 
 const SLOGANS = [
-  ['We Listen. We Care. We Soar.', 'Version 1'],
+  ['We Listen. We Care. We Go Beyond.', 'Version 1'],
   ['Your Voice. Our Vision. One Nation.', 'Version 2'],
 ];
 
