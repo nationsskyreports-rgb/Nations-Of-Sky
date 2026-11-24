@@ -2,6 +2,7 @@ import { admin, one } from '@/lib/supabase-admin';
 import { requireUser } from '@/lib/auth';
 import { fmtDateTime } from '@/lib/format';
 import SendForm from '@/components/SendForm';
+import ScrollArea from '@/components/ScrollArea';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export default async function SendPage() {
 
       <section className="d-card">
         <h2>Recent links</h2>
-        <div className="d-table-wrap">
+        <ScrollArea className="d-table-wrap" wrapperClassName="d-table-sa">
           <table className="d-table">
             <thead>
               <tr>
@@ -73,7 +74,7 @@ export default async function SendPage() {
               )}
             </tbody>
           </table>
-        </div>
+        </ScrollArea>
       </section>
     </div>
   );

@@ -3,6 +3,7 @@ import AutoFilters from '@/components/AutoFilters';
 import LiveRefresh from '@/components/LiveRefresh';
 import { admin, fetchAll, one } from '@/lib/supabase-admin';
 import { avg, pct, rangeStart, dayKey, fmtDateTime } from '@/lib/format';
+import ScrollArea from '@/components/ScrollArea';
 
 export const dynamic = 'force-dynamic';
 
@@ -166,7 +167,7 @@ export default async function Overview({ searchParams }) {
 
       <section className="d-card">
         <h2>By branch</h2>
-        <div className="d-table-wrap">
+        <ScrollArea className="d-table-wrap" wrapperClassName="d-table-sa">
           <table className="d-table">
             <thead>
               <tr>
@@ -196,12 +197,12 @@ export default async function Overview({ searchParams }) {
               )}
             </tbody>
           </table>
-        </div>
+        </ScrollArea>
       </section>
 
       <section className="d-card">
         <h2>Latest low ratings (2 stars or less)</h2>
-        <div className="d-table-wrap">
+        <ScrollArea className="d-table-wrap" wrapperClassName="d-table-sa">
           <table className="d-table">
             <thead>
               <tr>
@@ -231,7 +232,7 @@ export default async function Overview({ searchParams }) {
               )}
             </tbody>
           </table>
-        </div>
+        </ScrollArea>
         <p className="d-note">
           <Link href="/dashboard/responses">See every scan and answer</Link>
         </p>

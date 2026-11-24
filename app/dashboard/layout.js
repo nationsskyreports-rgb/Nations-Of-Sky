@@ -1,5 +1,6 @@
 import { requireUser } from '@/lib/auth';
 import NavLink from '@/components/NavLink';
+import ScrollArea from '@/components/ScrollArea';
 import SignOut from '@/components/SignOut';
 import { ToastProvider } from '@/components/Toast';
 
@@ -33,13 +34,15 @@ export default async function DashboardLayout({ children }) {
           </span>
           <span>Voice of Customer</span>
         </div>
-        <nav className="d-nav" aria-label="Main">
-          {links.map(([href, label]) => (
-            <NavLink key={href} href={href}>
-              {label}
-            </NavLink>
-          ))}
-        </nav>
+        <ScrollArea className="d-nav" wrapperClassName="d-nav-wrap" centerActive>
+          <nav className="d-nav-inner" aria-label="Main">
+            {links.map(([href, label]) => (
+              <NavLink key={href} href={href}>
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+        </ScrollArea>
         <div className="d-user">
           <SignOut />
         </div>

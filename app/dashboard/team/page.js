@@ -2,6 +2,7 @@ import { admin } from '@/lib/supabase-admin';
 import { requireAdmin } from '@/lib/auth';
 import { createUser, setUserActive } from '@/app/dashboard/actions';
 import ActionForm from '@/components/ActionForm';
+import ScrollArea from '@/components/ScrollArea';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,7 @@ export default async function Team() {
       </ActionForm>
 
       <section className="d-card">
-        <div className="d-table-wrap">
+        <ScrollArea className="d-table-wrap" wrapperClassName="d-table-sa">
           <table className="d-table">
             <thead>
               <tr>
@@ -76,7 +77,7 @@ export default async function Team() {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollArea>
       </section>
     </div>
   );

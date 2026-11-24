@@ -3,6 +3,7 @@ import AutoFilters from '@/components/AutoFilters';
 import LiveRefresh from '@/components/LiveRefresh';
 import { admin, fetchAll, one } from '@/lib/supabase-admin';
 import { fmtDateTime, rangeStart } from '@/lib/format';
+import ScrollArea from '@/components/ScrollArea';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,7 +86,7 @@ export default async function Responses({ searchParams }) {
       <p className="d-note">{all.length} results</p>
 
       <section className="d-card">
-        <div className="d-table-wrap">
+        <ScrollArea className="d-table-wrap" wrapperClassName="d-table-sa">
           <table className="d-table">
             <thead>
               <tr>
@@ -157,7 +158,7 @@ export default async function Responses({ searchParams }) {
               )}
             </tbody>
           </table>
-        </div>
+        </ScrollArea>
       </section>
 
       {pages > 1 && (
