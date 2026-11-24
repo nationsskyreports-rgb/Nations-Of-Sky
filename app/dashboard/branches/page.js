@@ -31,7 +31,7 @@ export default async function Branches() {
       </section>
 
       <div className="d-head">
-        <h1>Branches</h1>
+        <h1>QR code</h1>
       </div>
       <p className="d-note">Active branches are the choices the customer sees after scanning.</p>
 
