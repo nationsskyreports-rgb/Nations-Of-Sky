@@ -1608,7 +1608,7 @@ body:has(.light) {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 8mm;
+  padding: 5mm;
 }
 
 .pc-qr {
@@ -1636,13 +1636,13 @@ body:has(.light) {
 }
 
 .pc-foot {
-  margin: 0 0 8mm;
+  margin: 0 0 4mm;
   font-size: 9pt;
   color: #555;
 }
 
 .pc-voc {
-  margin: 7mm 0 3mm;
+  margin: 5mm 0 2mm;
 }
 
 .pc-card.mono .pc-voc {
@@ -1655,8 +1655,8 @@ body:has(.light) {
 
 .pc-brand-logo {
   display: block;
-  width: 12mm;
-  height: 12mm;
+  width: 10mm;
+  height: 10mm;
 }
 
 .pc-choose {
@@ -1712,7 +1712,7 @@ body:has(.light) {
 }
 
 .pc-card.dark .pc-foot {
-  margin-bottom: 12mm;
+  margin-bottom: 5mm;
   color: #9a9484;
 }
 
