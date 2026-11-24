@@ -27,6 +27,12 @@ export async function POST(req) {
     .maybeSingle();
   if (!scan) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
+  // A finished response can no longer be changed.
+  const { data: existing } = await db.from('responses').select('status').eq('scan_id', scan.id).maybeSingle();
+  if (existing?.status === 'complete') {
+    return NextResponse.json({ ok: true, locked: true });
+  }
+
   const now = new Date().toISOString();
   const row = {
     scan_id: scan.id,

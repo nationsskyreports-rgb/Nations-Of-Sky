@@ -5,6 +5,9 @@ import { parseUA, hashIp, clip } from '@/lib/server-utils';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+// At most this many page opens per IP address in one hour.
+const MAX_SCANS_PER_HOUR = 200;
+
 export async function POST(req) {
   let body;
   try {
@@ -52,6 +55,19 @@ export async function POST(req) {
     }
   };
 
+  const ipHash = hashIp(ip);
+  if (ipHash) {
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count } = await db
+      .from('scans')
+      .select('id', { count: 'exact', head: true })
+      .eq('ip_hash', ipHash)
+      .gte('created_at', since);
+    if ((count || 0) >= MAX_SCANS_PER_HOUR) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+  }
+
   const { data, error } = await db
     .from('scans')
     .insert({
@@ -69,7 +85,7 @@ export async function POST(req) {
       screen: clip(body.screen, 20),
       timezone: clip(body.timezone, 60),
       referrer: clip(body.referrer, 300),
-      ip_hash: hashIp(ip),
+      ip_hash: ipHash,
     })
     .select('id')
     .single();
