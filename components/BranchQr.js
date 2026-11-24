@@ -1,20 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { buildQrSvg, logoDataUrl, svgToPngBlob, downloadBlob } from '@/lib/qr';
+import { buildQrSvg, svgToPngBlob, downloadBlob } from '@/lib/qr';
 
 export default function BranchQr({ url, fileName }) {
   const [svg, setSvg] = useState('');
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    let alive = true;
-    logoDataUrl()
-      .then((logo) => alive && setSvg(buildQrSvg(url, { logo })))
-      .catch(() => alive && setSvg(buildQrSvg(url)));
-    return () => {
-      alive = false;
-    };
+    setSvg(buildQrSvg(url));
   }, [url]);
 
   const copy = async () => {

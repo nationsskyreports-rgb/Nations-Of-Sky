@@ -1582,6 +1582,7 @@ body:has(.light) {
   width: 18mm;
   height: 18mm;
   margin-bottom: 5mm;
+  filter: brightness(0) invert(1);
 }
 
 .pc-eyebrow {

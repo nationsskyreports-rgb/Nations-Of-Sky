@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { buildQrSvg, logoDataUrl } from '@/lib/qr';
+import { buildQrSvg } from '@/lib/qr';
 
 const DESIGNS = [
   ['mono', 'Black & white'],
@@ -22,13 +22,7 @@ export default function PrintCard({ url, branchName }) {
   const [slogan, setSlogan] = useState(0);
 
   useEffect(() => {
-    let alive = true;
-    logoDataUrl()
-      .then((logo) => alive && setSvg(buildQrSvg(url, { logo, margin: 1 })))
-      .catch(() => alive && setSvg(buildQrSvg(url, { margin: 1 })));
-    return () => {
-      alive = false;
-    };
+    setSvg(buildQrSvg(url, { margin: 1 }));
   }, [url]);
 
   const qr = <div className="pc-qr" dangerouslySetInnerHTML={{ __html: svg }} />;
