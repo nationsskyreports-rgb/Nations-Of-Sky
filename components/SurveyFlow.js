@@ -110,6 +110,7 @@ export default function SurveyFlow({
   const [hover, setHover] = useState(0);
   const [answers, setAnswers] = useState({});
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const scanPromise = useRef(null);
   const scanIdRef = useRef(null);
@@ -155,6 +156,32 @@ export default function SurveyFlow({
     } catch {}
   };
 
+  const sidRef = useRef('');
+
+  // Logs the page open; can be called again if the first attempt failed.
+  const startScan = useCallback(() => {
+    scanPromise.current = fetch('/api/scan', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({
+        branchSlug,
+        token,
+        pick: needsBranch,
+        sessionId: sidRef.current,
+        screen: `${window.screen.width}x${window.screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        referrer: document.referrer,
+      }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        scanIdRef.current = d.scanId || null;
+        return scanIdRef.current;
+      })
+      .catch(() => null);
+    return scanPromise.current;
+  }, [branchSlug, token, needsBranch]);
+
   // Every page open is logged, even if the customer never answers.
   useEffect(() => {
     let sid = '';
@@ -168,43 +195,33 @@ export default function SurveyFlow({
         localStorage.setItem('voc_sid', sid);
       }
     } catch {}
+    sidRef.current = sid;
+    startScan();
+  }, [startScan]);
 
-    scanPromise.current = fetch('/api/scan', {
-      method: 'POST',
-      headers: JSON_HEADERS,
-      body: JSON.stringify({
-        branchSlug,
-        token,
-        pick: needsBranch,
-        sessionId: sid,
-        screen: `${window.screen.width}x${window.screen.height}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        referrer: document.referrer,
-      }),
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        scanIdRef.current = d.scanId || null;
-        return scanIdRef.current;
-      })
-      .catch(() => null);
-  }, [branchSlug, token, needsBranch]);
-
-  const save = useCallback(async (payload) => {
-    const id = await scanPromise.current;
-    if (!id) return false;
-    try {
-      const res = await fetch('/api/response', {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        keepalive: true,
-        body: JSON.stringify({ scanId: id, branchId: branchRef.current || undefined, ...payload }),
-      });
-      return res.ok;
-    } catch {
+  // Returns true only when the server confirmed the save. Retries once on a network or server failure.
+  const save = useCallback(
+    async (payload) => {
+      let id = await scanPromise.current;
+      if (!id) id = await startScan();
+      if (!id) return false;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch('/api/response', {
+            method: 'POST',
+            headers: JSON_HEADERS,
+            keepalive: true,
+            body: JSON.stringify({ scanId: id, branchId: branchRef.current || undefined, ...payload }),
+          });
+          if (res.ok) return true;
+          if (res.status < 500) return false;
+        } catch {}
+        await new Promise((r) => setTimeout(r, 800));
+      }
       return false;
-    }
-  }, []);
+    },
+    [startScan]
+  );
 
   // Autosave answers while the customer types.
   useEffect(() => {
@@ -238,15 +255,19 @@ export default function SurveyFlow({
     setStep('intro');
   };
 
-  const pick = (n) => {
-    if (step !== 'intro') return;
+  const pick = async (n) => {
+    if (step !== 'intro' || busy) return;
+    setFailed(false);
     setRating(n);
     if (questions.length) {
       save({ rating: n });
       setTimeout(() => setStep('details'), 600);
     } else {
-      save({ rating: n, final: true });
-      setTimeout(() => setStep('done'), 600);
+      setBusy(true);
+      const ok = await save({ rating: n, final: true });
+      setBusy(false);
+      if (ok) setStep('done');
+      else setFailed(true);
     }
   };
 
@@ -267,9 +288,11 @@ export default function SurveyFlow({
 
   const submit = async () => {
     setBusy(true);
-    await save({ rating, answers, final: true });
+    setFailed(false);
+    const ok = await save({ rating, answers, final: true });
     setBusy(false);
-    setStep('done');
+    if (ok) setStep('done');
+    else setFailed(true);
   };
 
   const first = (customerName || '').trim().split(/\s+/)[0];
@@ -338,6 +361,7 @@ export default function SurveyFlow({
                 ))}
               </div>
               <p className="vc-rate-label">{active ? t.ratings[active - 1] : t.tapStar}</p>
+              {failed ? <p className="vc-error">{t.sendFailed}</p> : null}
             </div>
 
             {needsBranch ? (
@@ -372,6 +396,7 @@ export default function SurveyFlow({
               ))}
             </div>
 
+            {failed ? <p className="vc-error">{t.sendFailed}</p> : null}
             <button type="button" className="vc-btn" disabled={!canSubmit || busy} onClick={submit}>
               {busy ? t.sending : t.send}
             </button>

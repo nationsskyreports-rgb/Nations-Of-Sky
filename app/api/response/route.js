@@ -52,7 +52,7 @@ export async function POST(req) {
   if (Number.isInteger(rating) && rating >= 1 && rating <= 5) row.rating = rating;
 
   if (body.answers && typeof body.answers === 'object') {
-    const { data: questions } = await db.from('questions').select('id, label, type');
+    const { data: questions } = await db.from('questions').select('id, label, type, options');
     const byId = new Map((questions || []).map((q) => [q.id, q]));
     const list = [];
     let name = null;
@@ -65,6 +65,8 @@ export async function POST(req) {
       if (typeof value === 'string') value = value.trim().slice(0, 2000);
       else if (typeof value !== 'number' && typeof value !== 'boolean') continue;
       if (value === '') continue;
+      // A choice answer must be one of the saved options.
+      if (q.type === 'choice' && !(Array.isArray(q.options) && q.options.includes(value))) continue;
       list.push({ id, label: q.label, type: q.type, value });
       if (q.type === 'name') name = clip(value, 120);
       if (q.type === 'phone') phone = clip(String(value).replace(/[^\d+]/g, ''), 20);
@@ -76,13 +78,22 @@ export async function POST(req) {
 
   if (body.final) {
     const settings = await getSettings();
-    const { data: active } = await db.from('questions').select('type').eq('active', true);
+    const { data: active } = await db.from('questions').select('id, type, required').eq('active', true);
     const types = new Set((active || []).map((q) => q.type));
     const digits = String(row.phone || '').replace(/\D/g, '').length;
     if (settings.require_name === 'true' && types.has('name') && !row.name)
       return NextResponse.json({ error: 'Name required' }, { status: 422 });
     if (settings.require_phone === 'true' && types.has('phone') && digits < 7)
       return NextResponse.json({ error: 'Mobile required' }, { status: 422 });
+    // Every question marked as required must have a valid answer.
+    const given = new Map((row.answers || []).map((a) => [a.id, a]));
+    for (const q of active || []) {
+      if (!q.required) continue;
+      const a = given.get(q.id);
+      if (!a) return NextResponse.json({ error: 'Required answer missing' }, { status: 422 });
+      if (q.type === 'phone' && String(a.value).replace(/\D/g, '').length < 7)
+        return NextResponse.json({ error: 'Mobile required' }, { status: 422 });
+    }
     row.status = 'complete';
     row.completed_at = now;
   }

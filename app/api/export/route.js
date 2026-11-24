@@ -7,7 +7,13 @@ import { TIMEZONE } from '@/lib/config';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+// Cells that start with = + - @ (or a tab/CR) are prefixed with an apostrophe so Excel never runs them as formulas.
+// A plain phone number such as +201001234567 is left as is.
+const esc = (v) => {
+  let s = String(v ?? '');
+  if (/^[=+\-@\t\r]/.test(s) && !/^\+\d+$/.test(s)) s = `'${s}`;
+  return `"${s.replace(/"/g, '""')}"`;
+};
 
 export async function GET(req) {
   const user = await getCurrentUser();
