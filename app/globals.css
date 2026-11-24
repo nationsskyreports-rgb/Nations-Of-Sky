@@ -1166,6 +1166,16 @@ body:has(.light) {
   align-content: start;
 }
 
+.d-qr-card {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.d-qr .d-actions {
+  justify-content: center;
+}
+
 .d-qr {
   display: grid;
   gap: 14px;
@@ -1539,6 +1549,16 @@ body:has(.light) {
   justify-items: center;
 }
 
+.pc-fit {
+  overflow: hidden;
+}
+
+.pc-scale {
+  width: 148mm;
+  height: 210mm;
+  transform-origin: top left;
+}
+
 .pc-bar {
   display: flex;
   align-items: center;
@@ -1752,6 +1772,16 @@ body:has(.light) {
   .pc-card {
     width: 148mm;
     height: 210mm;
+  }
+
+  .pc-fit {
+    width: auto !important;
+    height: auto !important;
+    overflow: visible;
+  }
+
+  .pc-scale {
+    transform: none !important;
   }
 }
 

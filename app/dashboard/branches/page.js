@@ -23,7 +23,7 @@ export default async function Branches() {
         <b>{base}/r</b> &mdash; check this is the final address before printing.
       </p>
 
-      <section className="d-card">
+      <section className="d-card d-qr-card">
         <BranchQr url={`${base}/r`} fileName="nations-of-sky-qr" />
         <Link className="d-btn" href="/dashboard/card">
           Printable card
