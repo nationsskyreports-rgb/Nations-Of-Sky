@@ -10,8 +10,8 @@ const DESIGNS = [
 ];
 
 const SLOGANS = [
-  ['We Listen. We Care. We Go Beyond.', 'Version 1'],
-  ['Your Voice. Our Vision. One Nation.', 'Version 2'],
+  [['We Listen. We Care.', 'We Go Beyond.'], 'Version 1'],
+  [['Your Voice. Our Vision.', 'One Nation.'], 'Version 2'],
 ];
 
 const QR_LINE = 'Your Voice Shapes Our Skyline';
@@ -26,7 +26,11 @@ export default function PrintCard({ url, branchName }) {
   }, [url]);
 
   const qr = <div className="pc-qr" dangerouslySetInnerHTML={{ __html: svg }} />;
-  const title = SLOGANS[slogan][0];
+  const title = SLOGANS[slogan][0].map((line, i) => (
+    <span key={line} style={{ display: 'block' }}>
+      {line}
+    </span>
+  ));
 
   return (
     <div className="pc-page">
@@ -52,7 +56,7 @@ export default function PrintCard({ url, branchName }) {
               type="button"
               key={label}
               className={`d-btn ${slogan === i ? '' : 'ghost'}`}
-              title={text}
+              title={text.join(' ')}
               onClick={() => setSlogan(i)}
             >
               {label}
@@ -71,26 +75,26 @@ export default function PrintCard({ url, branchName }) {
         <div className="pc-card mono">
           <div className="pc-top">
             <img src="/logo.png" alt="" className="pc-logo" />
-            <p className="pc-eyebrow">Voice of Customer</p>
             <h2 className="pc-title">{title}</h2>
           </div>
           <div className="pc-bottom">
             {qr}
+            <p className="pc-eyebrow pc-voc">Voice of Customer</p>
             <p className="pc-scan">{QR_LINE}</p>
             <p className="pc-foot">Scan to rate your visit</p>
-            <p className="pc-brand">Nations of Sky</p>
+            <img src="/logo.png" alt="Nations of Sky" className="pc-brand-logo" />
           </div>
         </div>
       ) : (
         <div className="pc-card dark">
           <div className="pc-inner">
             <img src="/logo.png" alt="" className="pc-logo" />
-            <p className="pc-eyebrow">Voice of Customer</p>
             <h2 className="pc-title">{title}</h2>
             {qr}
+            <p className="pc-eyebrow pc-voc">Voice of Customer</p>
             <p className="pc-scan">{QR_LINE}</p>
             <p className="pc-foot">Scan to rate your visit</p>
-            <p className="pc-brand">Nations of Sky</p>
+            <img src="/logo.png" alt="Nations of Sky" className="pc-brand-logo" />
           </div>
         </div>
       )}

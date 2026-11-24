@@ -1641,6 +1641,24 @@ body:has(.light) {
   color: #555;
 }
 
+.pc-voc {
+  margin: 7mm 0 3mm;
+}
+
+.pc-card.mono .pc-voc {
+  color: #0a0a0a;
+}
+
+.pc-voc + .pc-scan {
+  margin-top: 0;
+}
+
+.pc-brand-logo {
+  display: block;
+  width: 12mm;
+  height: 12mm;
+}
+
 .pc-choose {
   display: flex;
   gap: 8px;
